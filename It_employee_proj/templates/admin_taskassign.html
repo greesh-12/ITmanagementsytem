@@ -1,0 +1,115 @@
+{% extends 'admin_base.html' %}
+
+{% block content %}
+{% load static %}
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f8f9fa;
+        margin: 0;
+        padding: 0;
+    }
+
+    .form-container {
+        max-width: 800px;
+        margin: 30px auto;
+        background: #ffffff;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    label {
+        font-weight: bold;
+    }
+
+    .btn-primary {
+        background-color: #007bff;
+        border: none;
+    }
+
+    .btn-primary:hover {
+        background-color: #0056b3;
+    }
+
+    /* Adjust dropdown options for smaller screens */
+    @media (max-width: 576px) {
+        .form-select {
+            font-size: 14px; /* Smaller font size for dropdown */
+            padding: 8px;    /* Padding for touch accessibility */
+            width: 65%;
+        }
+
+        /* Adjust the dropdown options specifically */
+        select.form-select option {
+            font-size: 14px; /* Ensure options adapt in smaller screens */
+            padding: 6px;    /* Adjust padding for each option */
+            
+        }
+    }
+
+    @media (max-width: 768px) {
+        .form-container {
+            padding: 15px;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+        }
+    }
+</style>
+
+<div class="form-container">
+    {% if messages %}
+    <div class="alert alert-success alert-dismissible fade show" role="alert" style="border: 2px solid #28a745; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close" style="font-size: 1.2rem; color: #155724;">
+        <span aria-hidden="true">&times;</span>
+    </button>
+    {% for message in messages %}
+    <center>
+        <p style="margin: 0; padding: 5px; font-weight: bold; color: #155724;">{{ message }}</p>
+    </center>
+    {% endfor %}
+    </div>
+    {% endif %}
+
+    <h1>Assign Project to Team Lead</h1>
+    <form action="{% url 'admin_taskassign' %}" method="post">
+        {% csrf_token %}
+        <!-- Project Selection -->
+        <div class="mb-3">
+            <label for="project" class="form-label">Project</label>
+            <select class="form-select" id="project" name="project" required>
+                <option value="" disabled selected>Select a Project</option>
+                {% for project in projects %}
+                <option value="{{ project.id }}">{{ project.project_name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Team Lead Assignment -->
+        <div class="mb-3">
+            <label for="teamLead" class="form-label">Assign Team Lead</label>
+            <select class="form-select" id="teamLead" name="team_lead" required>
+                <option value="" disabled selected>Select a Team Lead</option>
+                {% for leader in team_leads %}
+                <option value="{{ leader.id }}">{{ leader.user.first_name }} {{ leader.user.last_name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" class="btn btn-primary w-90">Assign Project</button>
+    </form>
+</div>
+
+<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+
+
+{% endblock %}

@@ -1,0 +1,206 @@
+{% extends 'devp_base.html' %}
+
+{% block content %}
+
+<style>
+    /* Reset default styles */
+    body, h1, h2, h3, ul, li {
+        margin: 0;
+        padding: 0;
+        font-family: Arial, sans-serif;
+    }
+
+    body {
+        background-color: #f4f4f9;
+        color: #333;
+        line-height: 1.6;
+    }
+
+    .container-progress {
+        width: 90%;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    h1 {
+        text-align: center;
+        margin-bottom: 30px;
+        font-size: 2.5rem;
+        color: #0044cc;
+    }
+
+    h2 {
+        font-size: 1.8rem;
+        margin-top: 20px;
+        color: #2a2a2a;
+    }
+
+    h3 {
+        font-size: 1.2rem;
+        margin-top: 10px;
+        color: #555;
+    }
+
+    ul {
+        list-style: none;
+        padding-left: 20px;
+    }
+
+    li strong {
+        color: #0044cc;
+    }
+
+    a {
+        color: #008CBA;
+        text-decoration: none;
+        font-weight: bold;
+    }
+
+    a:hover {
+        text-decoration: underline;
+    }
+
+    .no-updates {
+        text-align: center;
+        font-size: 1.2rem;
+        color: #888;
+    }
+
+    .filter-form {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.filter-form select,
+.filter-form input[type="date"] {
+    padding: 8px;
+    font-size: 14px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    width: 70%;
+    max-width: 250px;
+}
+
+.filter-form button {
+    padding: 8px 16px;
+    font-size: 14px;
+    color: white;
+    background-color: #007BFF;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.filter-form button:hover {
+    background-color: #0056b3;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+    .filter-form {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .filter-form select,
+    .filter-form input[type="date"],
+    .filter-form button {
+        max-width: 100%;
+    }
+}
+
+    /* Responsive design */
+    @media (max-width: 768px) {
+        h1 {
+            font-size: 2rem;
+        }
+
+        .container {
+            width: 95%;
+        }
+
+        #d {
+            padding: 10px;
+        }
+
+        h2 {
+            font-size: 1.6rem;
+        }
+
+        h3 {
+            font-size: 1rem;
+        }
+    }
+</style>
+
+<div class="container-progress">
+    <h1>Daily Progress History</h1>
+
+    <!-- Filter Form -->
+    <form method="GET" class="filter-form">
+        <!-- Project Dropdown -->
+        <select name="project_name">
+            <option value="">All Projects</option>
+            {% for project in projects %}
+                <option value="{{ project.project_name }}" {% if request.GET.project_name == project.project_name %}selected{% endif %}>
+                    {{ project.project_name }}
+                </option>
+            {% endfor %}
+        </select>
+        
+        <!-- Date Input -->
+        <label for="updated_at">Filter by Date:</label>
+        <input type="date" name="updated_at" value="{{ selected_updated_at }}">
+    
+        <!-- Submit Button -->
+        <button type="submit">Filter</button>
+    </form>
+
+    {% if progress_history %}
+        {% for project, updates_by_date in progress_history.items %}
+            {% if not request.GET.project_name or request.GET.project_name == project.project_name %}
+                <h2>Project: {{ project.project_name }}</h2>
+
+                {% for date, updates in updates_by_date.items %}
+                    <ul>
+                        {% for update in updates %}
+                            <li style="background: #fff; padding: 15px; margin-bottom: 10px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);">
+                                <strong>Task:</strong> {{ update.task.module.module_name }} <br>
+                                <strong>Status:</strong> {{ update.status }} <br>
+                                <strong>Progress:</strong> {{ update.progress_update }} <br>
+
+                                {% if update.attachments %}
+                                    <strong>Attachment:</strong>
+                                    <a href="{{ update.attachments.url }}">View Attachment</a> <br>
+                                {% endif %}
+
+                                <strong>Updated By:</strong>
+                                {% if update.updated_by %}
+                                    {{ update.updated_by.username }}
+                                {% else %}
+                                    System
+                                {% endif %} <br>
+
+                                <strong>Updated At:</strong> {{ update.updated_at|date:"F j, Y" }} <br>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% endfor %}
+            {% endif %}
+        {% endfor %}
+    {% else %}
+        <p class="no-updates">No updates available.</p>
+    {% endif %}
+</div><br><br><br><br><br>
+
+{% endblock %}

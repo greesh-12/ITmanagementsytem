@@ -1,0 +1,140 @@
+{% extends 'devp_base.html' %}
+
+{% block content %}
+{% load static %}
+
+<style>
+    /* General Reset */
+    * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+
+        /* Navbar Style */
+        /* .navbar {
+            background-color: #020221; 
+            overflow: hidden;
+            padding: 10px 0;
+            border-bottom: 2px solid #ccc;
+        }
+
+        .navbar a {
+            float: left;
+            display: block;
+            color: white;
+            padding: 14px 20px;
+            text-align: center;
+            text-decoration: none;
+            font-size: 18px;
+            transition: background-color 0.3s ease;
+        }
+
+        .navbar a:hover {
+            background-color: #333;
+        } */
+
+        /* Centered Content */
+        center {
+            margin-top: 40px;
+        }
+
+        /* Alert Message */
+        .alert {
+            background-color: #f44336;
+            color: white;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            width: 50%;
+            text-align: center;
+            font-size: 16px;
+        }
+
+        .alert .close {
+            color: white;
+            font-size: 18px;
+            margin-left: 15px;
+            cursor: pointer;
+        }
+
+        /* Card Style */
+        .card {
+            background-color: #fff;
+            padding: 20px;
+            width: 400px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .card input {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+            background-color: #f9f9f9;
+        }
+
+        .card input:focus {
+            border-color: #5d5dff;
+            outline: none;
+            background-color: #eef;
+        }
+
+        .button-5 {
+            background-color: #5d5dff; 
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .button-5:hover {
+            background-color: #4c4ce0;
+        }
+
+        /* Badge Style */
+        .badge {
+            background-color: #f44336;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 14px;
+        }
+</style>
+<center>
+    {% if messages %}
+    <div class="alert alert-danger alert-dismissible">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        {% for message in messages %}
+            {{ message }}
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <h2>Update Password</h2><br>
+    <div class="card">
+        <form action="{% url 'devp_reset_pswd_fun' %}" method="post">
+            {% csrf_token %}
+            <input type="password" placeholder="Current Password" name="currentpass" required id="c1"><br><br>
+            <input type="password" placeholder="New Password" name="newpass" required id="c2"><br><br>
+            <input type="password" placeholder="Confirm Password" name="confirmpass" required id="c3"><br><br>
+            <button type="submit" class="button-5">Reset</button>
+        </form>
+    </div>
+</center>
+
+{% endblock %}

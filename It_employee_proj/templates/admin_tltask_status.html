@@ -1,0 +1,230 @@
+{% extends 'admin_base.html' %}
+
+{% block content %}
+    
+<style>
+    /* General Styles */
+    body {
+        font-family: 'Helvetica Neue', sans-serif;
+        background-color: #f5f6fa;
+        margin: 0;
+        padding: 0;
+    }
+
+    h1 {
+        text-align: center;
+        margin: 50px 0;
+        font-size: 40px;
+        color: #333;
+    }
+
+    h2 {
+        font-size: 24px;
+        color: #444;
+        margin-top: 20px;
+    }
+
+    h5 {
+        font-size: 18px;
+        color: #777;
+        margin: 5px 0 20px;
+    }
+
+    p {
+        font-size: 16px;
+        margin: 20px 0;
+    }
+
+    /* Filter Section */
+    .filter-container {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+    }
+
+    .filter-container select,
+    .filter-container button {
+        padding: 12px 18px;
+        font-size: 16px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        background-color: #fff;
+        cursor: pointer;
+        transition: background-color 0.3s ease, border-color 0.3s ease;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .filter-container button {
+        background-color: #3498db;
+        color: white;
+        transition: background-color 0.3s ease;
+    }
+
+    .filter-container button:hover {
+        background-color: #2980b9;
+    }
+
+    /* Table Styles */
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        background-color: #fff;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        margin-top: 40px;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    th, td {
+        padding: 15px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+    }
+
+    th {
+        background-color: #3498db;
+        color: white;
+        font-weight: bold;
+        text-transform: uppercase;
+    }
+
+    td {
+        background-color: #f9f9f9;
+        color: #333;
+    }
+
+    tr:hover td {
+        background-color: #ecf0f1;
+    }
+
+    tr:nth-child(even) td {
+        background-color: #fafafa;
+    }
+
+    .table-container {
+        overflow-x: auto;
+        padding: 0 15px;
+    }
+
+    /* Responsive Design */
+    @media screen and (max-width: 768px) {
+        h1 {
+            font-size: 32px;
+            margin: 20px 0;
+        }
+
+        .filter-container {
+            flex-direction: column;
+            align-items: stretch;
+            padding: 0 15px;
+        }
+
+        .filter-container select, .filter-container button {
+            width: 70%;
+            margin: 10px 0;
+        }
+
+        table {
+            font-size: 14px;
+        }
+
+        th, td {
+            padding: 12px;
+        }
+
+        .no-projects {
+            padding: 10px;
+            font-size: 16px;
+        }
+
+        h2 {
+            font-size: 20px;
+            margin-top: 10px;
+        }
+    }
+</style>
+
+<h1>Team Leader Work Status</h1>
+
+<div class="filter-container">
+    <form method="GET">
+        <select name="team_leader"  aria-label="Filter by Team Leader">
+            <option value="">Select Team Leader</option>
+            {% for leader in team_leaders %}
+                <option value="{{ leader.id }}" {% if selected_team_leader == leader.id|stringformat:"s" %}selected{% endif %}>{{ leader.user.first_name }} {{ leader.user.last_name }}</option>
+            {% endfor %}
+        </select>
+
+        <select name="project" aria-label="Filter by Project">
+            <option value="">Select Project</option>
+            {% for project in projects %}
+                <option value="{{ project.id }}" {% if selected_project == project.id|stringformat:"s" %}selected{% endif %}>{{ project.project_name }}</option>
+            {% endfor %}
+        </select>
+
+        <button type="submit">Apply Filters</button>
+    </form>
+</div>
+
+{% if team_leader_status %}
+    {% for leader_status in team_leader_status %}
+        <section>
+            <h2>{{ leader_status.team_leader.user.first_name }} {{ leader_status.team_leader.user.last_name }}</h2>
+            <h5><strong>Department:</strong> {{ leader_status.team_leader.department.dept_name }}</h5>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Project Name</th>
+                            <th>Description</th>
+                            <th>Status</th>
+                            <th>Attachment</th>
+                            <th>Last Updated</th>
+                            <th>Daily Progress</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if leader_status.projects %}
+                            {% for project in leader_status.projects %}
+                                <tr>
+                                    <td>{{ project.project_name }}</td>
+                                    <td>{{ project.description }}</td>
+                                    <td>{{ project.status }}</td>
+                                    <td>
+                                        {% if project.latest_attachment %}
+                                            <a href="{{ project.latest_attachment.url }}" download>Download</a>
+                                        {% else %}
+                                            No Attachment
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ project.last_updated }}</td>
+                                    <td>
+                                        {% if project.id %}
+                                            <a href="{% url 'admintl_daily_progress' project_id=project.id %}">Check Progress</a>
+                                        {% else %}
+                                            No ID Available
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="6" class="no-projects">No projects assigned</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    {% endfor %}
+{% else %}
+    <h5 style="text-align: center;">No team leaders found.</h5>
+{% endif %}
+
+
+
+
+{% endblock %}

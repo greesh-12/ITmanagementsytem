@@ -1,0 +1,263 @@
+{% extends 'tl_base.html' %}
+
+{% block content %}
+{% load static %}
+
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f4f4f9;
+        color: #333;
+    }
+
+    h1 {
+        text-align: center;
+        padding: 20px;
+        color: #555;
+    }
+
+    .alert {
+        margin: 10px auto;
+        padding: 10px 15px;
+        width: 90%;
+        border-radius: 5px;
+    }
+
+    .alert-dismissible button {
+        background: none;
+        border: none;
+        float: right;
+        font-size: 1.2rem;
+        color: #000;
+        cursor: pointer;
+    }
+
+    .project-table {
+        margin: 20px auto;
+        padding: 10px;
+        width: 90%;
+        max-width: 1200px;
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    thead th {
+        background-color: #007bff;
+        color: #fff;
+        padding: 10px;
+        text-align: left;
+    }
+
+    tbody td {
+        padding: 10px;
+        border: 1px solid #ddd;
+    }
+
+    tbody tr:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+
+    tbody tr:hover {
+        background-color: #f1f1f1;
+    }
+
+    a {
+        color: #007bff;
+        text-decoration: none;
+    }
+
+    a:hover {
+        text-decoration: underline;
+    }
+
+    .no-projects {
+        text-align: center;
+        font-size: 1.2rem;
+        color: #666;
+        padding: 20px;
+    }
+
+    .back-link {
+        display: block;
+        text-align: center;
+        margin: 20px auto;
+        padding: 10px 20px;
+        max-width: 200px;
+        background: #007bff;
+        color: #fff;
+        text-decoration: none;
+        border-radius: 5px;
+    }
+
+    .back-link:hover {
+        background: #0056b3;
+        color: white;
+    }
+
+        /* Add this to your CSS file */
+.alert {
+    padding: 1rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 500;
+    border: 1px solid transparent;
+}
+
+.alert-success {
+    background-color: #76e991;
+    border-color: #c3e6cb;
+    color: #155724;
+}
+
+.alert-danger {
+    background-color: #dd5c67;
+    border-color: #f5c6cb;
+    color: #721c24;
+}
+
+.alert-warning {
+    background-color: #fff3cd;
+    border-color: #ffeeba;
+    color: #856404;
+}
+
+.alert-info {
+    background-color: #92ccd6;
+    border-color: #bee5eb;
+    color: #0c5460;
+}
+
+    @media (max-width: 768px) {
+        table, thead, tbody, th, td, tr {
+            display: block;
+        }
+
+        thead tr {
+            display: none;
+        }
+
+        tbody tr {
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        td {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            text-align: left;
+        }
+
+        td::before {
+            content: attr(data-label);
+            font-weight: bold;
+            width: 50%;
+            flex-shrink: 0;
+        }
+    }
+</style>
+
+<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+<h1>Projects Assigned to You</h1>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                <!-- <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button> -->
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- Dropdown Filter Form -->
+    <div class="container my-4">
+        <form method="GET" class="filter-form row justify-content-center align-items-center">
+            <div class="col-md-6 col-12 text-center">
+                <label for="project_name" class="form-label font-weight-bold mb-2">Filter by Project:</label>
+                <center><select 
+                    name="project_name" 
+                    id="project_name" 
+                    class="form-select-sm" 
+                    style="width: 55%; max-width: 400px;" 
+                    onchange="this.form.submit()"
+                >
+                    <option 
+                        value="all" 
+                        {% if selected_project == '' or selected_project == 'all' %}selected{% endif %}
+                    >
+                        All Projects
+                    </option>
+                    {% for project in all_projects %}
+                        <option 
+                            value="{{ project.project_name }}" 
+                            {% if selected_project == project.project_name %}selected{% endif %}
+                        >
+                            {{ project.project_name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </center>
+            </div>
+        </form>
+    </div>
+
+    <div class="project-table">
+        {% if projects %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Client Name</th>
+                        <th>Client Email</th>
+                        <th>Project Name</th>
+                        <th>Description</th>
+                        <th>Requirements</th>
+                        <th>Attachments</th>
+                        <th>Start Date</th>
+                        <th>End Date</th>
+                        
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for project in projects %}
+                        <tr>
+                            <td data-label="Client Name">{{ project.client_name }}</td>
+                            <td data-label="Client Email">{{ project.client_email }}</td>
+                            <td data-label="Project Name">{{ project.project_name }}</td>
+                            <td data-label="Description">{{ project.description }}</td>
+                            <td data-label="Requirements">{{ project.requirements }}</td>
+                            <td data-label="Attachments">
+                                {% if project.attachments %}
+                                    <a href="{{ project.attachments.url }}" download>Download</a>
+                                {% else %}
+                                    No Attachments
+                                {% endif %}
+                            </td>
+                            <td data-label="Start Date">{{ project.start_date|date:"Y-m-d" }}</td>
+                            <td data-label="End Date">{{ project.end_date|date:"Y-m-d" }}</td>
+                
+                        </tr>
+                        {% endfor %}
+                    
+                </tbody>
+            </table>
+        {% else %}
+            <p class="no-projects">No projects are currently assigned to you.</p>
+        {% endif %}
+
+        <a href="{% url 'tl_home' %}" style="text-decoration: none;" class="back-link">Back to Dashboard</a>
+    </div>
+
+
+{% endblock %}

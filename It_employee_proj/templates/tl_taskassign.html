@@ -1,0 +1,140 @@
+{% extends 'tl_base.html' %}
+
+{% block content %}
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f5f5f5;
+        margin: 0;
+        padding: 0;
+    }
+
+    .assign-module-container {
+        max-width: 600px;
+        margin: 50px auto;
+        background: #ffffff;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+        text-align: center;
+        color: #032346;
+        margin-bottom: 20px;
+        font-size: 1.8em;
+    }
+
+    form {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    label {
+        font-size: 1em;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 5px;
+    }
+
+    select,
+    input[type="text"],
+    textarea {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 1em;
+    }
+
+    textarea {
+        resize: none;
+    }
+
+    button {
+        background-color: #032346;
+        color: #ffffff;
+        font-size: 1em;
+        font-weight: bold;
+        padding: 10px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+
+    button:hover {
+        background-color: #044085;
+    }
+
+    .alert {
+        padding: 10px;
+        border: 1px solid transparent;
+        border-radius: 5px;
+        margin-bottom: 15px;
+        font-size: 0.9em;
+    }
+
+    .alert-success {
+        background-color: #d4edda;
+        border-color: #c3e6cb;
+        color: #155724;
+    }
+
+    .alert-danger {
+        background-color: #f8d7da;
+        border-color: #f5c6cb;
+        color: #721c24;
+    }
+
+    .alert-dismissible .close {
+        position: absolute;
+        top: 5px;
+        right: 10px;
+        color: inherit;
+    }
+</style>
+
+<div class="assign-module-container">
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <h1>Assign Module to Developer</h1>
+
+    <form method="post">
+        {% csrf_token %}
+        <label for="project_id">Select Project:</label>
+        <select name="project_id" id="project_id" required>
+            <option value="" disabled selected>Select a Project</option>
+            {% for project in projects %}
+            <option value="{{ project.id }}">{{ project.project_name }}</option>
+            {% endfor %}
+        </select>
+
+        <label for="developer_id">Select Developer:</label>
+        <select name="developer_id" id="developer_id" required>
+            <option value="" disabled selected>Select a developer</option>
+            {% for developer in developers %}
+            <option value="{{ developer.id }}">{{ developer.user.first_name }} {{ developer.user.last_name }}</option>
+            {% endfor %}
+        </select>
+
+        <label for="module_name">Module Name:</label>
+        <input type="text" name="module_name" id="module_name" placeholder="Enter module name" required>
+
+        <label for="module_description">Module Description:</label>
+        <textarea name="module_description" id="module_description" rows="4" placeholder="Provide a brief description"></textarea>
+
+        <button type="submit">Assign Task</button>
+    </form>
+</div>
+{% endblock %}

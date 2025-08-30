@@ -1,0 +1,875 @@
+{% extends 'admin_base.html' %}
+
+{% block content %}
+<style>
+    /* Styles */
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+        font-family: Arial, sans-serif;
+        color: #333;
+    }
+
+    .page-title {
+        text-align: center;
+        font-size: 2em;
+        color: #007BFF;
+        margin-bottom: 30px;
+    }
+
+    .project-title {
+        color: #0056b3;
+        margin: 20px 0;
+        font-size: 1.5em;
+    }
+
+    .table-wrapper {
+        overflow-x: auto;
+        margin-bottom: 20px;
+    }
+
+    .responsive-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 10px 0;
+    }
+
+    .responsive-table th, 
+    .responsive-table td {
+        padding: 12px 15px;
+        text-align: left;
+        border: 1px solid #ddd;
+    }
+
+    .responsive-table th {
+        background-color: #f8f9fa;
+        color: #333;
+        text-transform: uppercase;
+        font-size: 0.9em;
+    }
+
+    .responsive-table tr:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+
+    .no-tasks {
+        color: #dc3545;
+        font-style: italic;
+    }
+
+    .divider {
+        border: none;
+        border-top: 2px solid #ccc;
+        margin: 20px 0;
+    }
+
+    @media screen and (max-width: 768px) {
+        .responsive-table th,
+        .responsive-table td {
+            font-size: 0.8em;
+            padding: 10px;
+        }
+
+        .page-title {
+            font-size: 1.8em;
+        }
+
+        .project-title {
+            font-size: 1.2em;
+        }
+    }
+
+</style>
+<div class="container">
+    <h1 class="page-title">Team Leader Work Status</h1>
+
+    <form method="GET" action="">
+        <!-- Project Dropdown -->
+        <label for="project">Select Project:</label>
+        <select name="project" id="project" style="padding: 8px 12px; font-size: 14px;">
+            <option value="">--Select Project--</option>
+            {% for project in projects %}
+                <option value="{{ project.id }}" {% if project.id == selected_project_id %}selected{% endif %}>
+                    {{ project.project_name }}
+                </option>
+            {% endfor %}
+        </select>
+    
+        <!-- Team Leader Dropdown -->
+        <label for="team_leader">Select Team Leader:</label>
+        <select name="team_leader" id="team_leader" style="padding: 8px 12px; font-size: 14px;">
+            <option value="">-- All Team Leaders --</option>
+            {% for team_leader in team_leaders %}
+                <option value="{{ team_leader.user.id }}" {% if team_leader.user.id|stringformat:"s" == selected_team_leader_id %}selected{% endif %}>
+                    {{ team_leader.user.first_name }} {{ team_leader.user.last_name }}
+                </option>
+            {% endfor %}
+        </select>
+    
+        <!-- Filter Button -->
+        <button type="submit" style="padding: 8px 16px; background-color: #180431; color: white; border: none; border-radius: 4px; font-size: 14px; cursor: pointer;">
+            Filter
+        </button>
+    </form>
+
+    {% for project_name, task_groups in tasks_by_project.items %}
+        <div class="project-section">
+            <h2 class="project-title">Project: {{ project_name }}</h2>
+
+            {% if task_groups.developers %}
+                <h3>Assigned Team Leader:</h3>
+                <ul>
+                    {% for task in task_groups.team_leaders %}
+                        <li>{{ task.user.first_name }} {{ task.user.last_name }} (Team Leader)</li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p><strong>No Team Leader Assigned</strong></p>
+            {% endif %}
+
+            <!-- Team Leader Tasks -->
+            <h3>Team Leader Tasks</h3>
+            {% if task_groups.developers %}
+            <div class="table-wrapper">
+                <table class="responsive-table">
+                    <thead>
+                        <tr>
+                            <th>Team Leader Name</th>
+                            <th>Developer Name</th>
+                            <th>Module</th>
+                            <th>Status</th>
+                            <th>Comments</th>
+                            <th>Assigned On</th>
+                            <th>Updated At</th>
+                            <th>Daily Work Progress</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for task in task_groups.developers %}
+                        <tr>
+                            <td>
+                                {% if task.project.team_leader %}
+                                {{ task.project.team_leader.user.first_name }} {{ task.project.team_leader.user.last_name }}
+                                {% else %}
+                                Not Assigned
+                                {% endif %}
+                            </td>
+                            <td>{{ task.user.first_name }} {{ task.user.last_name }}</td>
+                            <td>{{ task.module.module_name }}</td>
+                            <td>{{ task.team_leader_status }}</td>
+                            <td>{{ task.team_leader_comments }}</td>
+                            <td>{{ task.assigned_at|date:"Y-m-d H:i" }}</td>
+                            <td>{{ task.updated_at|date:"Y-m-d H:i" }}</td>
+                            <td><a href="{% url 'admintl_daily_progress' task.id %}">Work Progress</a></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="no-tasks">No tasks assigned to team leaders for this project.</p>
+            {% endif %}
+        </div>
+        <hr class="divider">
+    {% endfor %}
+</div>
+{% endblock %}
+
+
+
+
+
+def admin_tltask_status(request):
+    selected_project_id = request.GET.get('project', None)
+    selected_team_leader_id = request.GET.get('team_leader', None)
+    tasks_by_project = {}
+    selected_project_name = None
+    team_leaders = []
+
+    if selected_project_id:
+        # Fetch the selected project and related tasks
+        selected_project = Project.objects.get(id=selected_project_id)
+        tasks = Task.objects.filter(project=selected_project).select_related('user', 'module', 'project')
+
+        # Filter by team leader if specified
+        if selected_team_leader_id:
+            tasks = tasks.filter(user_id=selected_team_leader_id)
+
+        tasks_by_project[selected_project.project_name] = {
+            'team_leaders': [task for task in tasks if task.user.user_type == 2],  # Team Leader tasks
+            'developers': [task for task in tasks if task.user.user_type == 3],  # Developer tasks
+        }
+
+        selected_project_name = selected_project.project_name
+        
+        # Fetch team leaders for this project
+        team_leaders = (
+            Registration.objects.filter(user__user_type=2, task__project=selected_project)
+            .distinct()
+            .select_related('user')
+        )
+    else:
+        # If no project is selected, show all tasks
+        tasks = Task.objects.select_related('user', 'project', 'module').all()
+
+        # Filter by team leader across all projects if specified
+        if selected_team_leader_id:
+            tasks = tasks.filter(user_id=selected_team_leader_id)
+
+        for task in tasks:
+            project_name = task.project.project_name
+            if project_name not in tasks_by_project:
+                tasks_by_project[project_name] = {
+                    'team_leaders': [],
+                    'developers': []
+                }
+            if task.user.user_type == 2:
+                tasks_by_project[project_name]['team_leaders'].append(task)
+            elif task.user.user_type == 3:
+                tasks_by_project[project_name]['developers'].append(task)
+
+        # Fetch all team leaders for the dropdown
+        team_leaders = Registration.objects.filter(user__user_type=2).distinct()
+
+    # Pass data to the template
+    projects = Project.objects.all()  # Populate the project dropdown
+    return render(request, 'admin_tltask_status.html', {
+        'tasks_by_project': tasks_by_project,
+        'projects': projects,
+        'selected_project_id': selected_project_id,
+        'selected_team_leader_id': selected_team_leader_id,
+        'team_leaders': team_leaders,
+        'selected_project_name': selected_project_name,
+    })
+
+
+
+
+    def tl_updates(request, task_id):
+    # Fetch the logged-in team leader
+    team_leader = Registration.objects.filter(user=request.user).first()
+
+    if not team_leader:
+        messages.error(request, "You do not have a valid registration record.")
+        return redirect('home1')
+
+    # Fetch projects assigned to the team leader
+    projects = Project.objects.filter(team_leader=team_leader)
+
+    if not projects:
+        messages.error(request, "You are not assigned to any projects.")
+        return redirect('home1')
+
+    # Fetch tasks for these projects
+    tasks = Task.objects.filter(project__in=projects)
+
+    if not tasks:
+        messages.error(request, "No tasks found for your projects.")
+        return redirect('tl_projectdetails')
+    
+    # Fetch the task by ID and make sure it belongs to the user
+    task = get_object_or_404(Task, id=task_id, project__team_leader__user=request.user)
+
+    # Get all updates for this task created by the team leader, ordered by date
+    team_leader_updates = TaskUpdate.objects.filter(
+        task=task,
+        updated_by=team_leader.user
+    ).order_by('updated_at')
+
+    # Group updates by date
+    updates_by_date = {}
+    for update in team_leader_updates:
+        date_str = update.updated_at.date()
+        if date_str not in updates_by_date:
+            updates_by_date[date_str] = []
+        updates_by_date[date_str].append(update)
+
+    # Handle form submission for status and comments update
+    if request.method == "POST":
+        status = request.POST.get('team_leader_status')
+        comments = request.POST.get('team_leader_comments')
+
+        if status and comments:
+            task.team_leader_status = status
+            task.team_leader_comments = comments
+            task.save()
+            # Save a new task update for the progress
+            TaskUpdate.objects.create(
+                task=task,
+                updated_by=team_leader.user,
+                status=status,
+                progress_update=comments,
+            )
+            messages.success(request, "Task updated successfully!")
+            return redirect('tl_status')  # Redirect back to project details page
+        else:
+            messages.error(request, "Both status and comments are required.")
+
+    return render(request, 'tl_updates.html', {
+        'task': task,
+        'tasks': tasks,
+        'updates_by_date': updates_by_date,  # Pass the team leader's updates grouped by date
+    })
+
+
+
+
+{% extends 'tl_base.html' %}
+
+{% block content %}
+{% load static %}
+
+<style>
+    /* General Styles */
+    body {
+        font-family: 'Arial', sans-serif;
+        background-color: #f0f4f8;
+        margin: 0;
+        padding: 0;
+        color: #333;
+    }
+
+    .container-updates {
+        width: 90%;
+        max-width: 1000px;
+        margin: 40px auto;
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        padding: 30px;
+    }
+
+    h1 {
+        color: #007BFF;
+        font-size: 2em;
+        margin-bottom: 30px;
+        text-align: center;
+    }
+
+    .date-header {
+        color: #0056b3;
+        font-size: 1.3em;
+        margin-bottom: 15px;
+        border-bottom: 2px solid #007BFF;
+        padding-bottom: 10px;
+    }
+
+    .update-card {
+        background-color: #f9f9f9;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .update-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .update-detail {
+        margin-bottom: 12px;
+    }
+
+    .update-detail strong {
+        color: #555;
+    }
+
+    .attachments {
+        display: inline-block;
+        margin-top: 10px;
+    }
+
+    .attachments a {
+        color: #007BFF;
+        text-decoration: none;
+    }
+
+    .attachments a:hover {
+        text-decoration: underline;
+    }
+
+    .back-link {
+        display: inline-block;
+        background-color: #007BFF;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 6px;
+        text-decoration: none;
+        font-size: 1.2em;
+        margin-top: 30px;
+        text-align: center;
+    }
+
+    .back-link:hover {
+        background-color: #0056b3;
+        color: white;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .container-updates {
+            padding: 20px;
+            width: 100%;
+        }
+
+        h1 {
+            font-size: 1.8em;
+            margin-bottom: 20px;
+        }
+
+        .date-header {
+            font-size: 1.1em;
+        }
+
+        .back-link {
+            font-size: 1em;
+            padding: 8px 16px;
+        }
+
+        .update-card {
+            padding: 15px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        h1 {
+            font-size: 1.6em;
+        }
+
+        .date-header {
+            font-size: 1em;
+        }
+
+        .back-link {
+            font-size: 0.9em;
+        }
+    }
+</style>
+
+<div class="container-updates">
+    <h1>Project : {{ task.project.project_name }}</h1>
+    <h1>Task Updates for Task #{{ task.module.module_name }}</h1>
+
+    <form method="get" class="filter-form" style="margin-bottom: 20px; text-align: center;">
+        <label for="date">Filter by:</label>
+        <select name="date" id="date" onchange="toggleCustomDate()" style="padding: 5px; margin-right: 10px;">
+            <option value="all" {% if daily_filter == 'all' %}selected{% endif %}>All Updates</option>
+            <option value="custom_date" {% if daily_filter == 'custom_date' %}selected{% endif %}>Custom Date</option>
+        </select>
+
+        <!-- Custom Date Picker -->
+        <input type="date" name="custom_date" id="custom_date" value="{{ custom_date }}" 
+               style="padding: 5px; display: {% if daily_filter == 'custom_date' %}inline-block{% else %}none{% endif %};">
+
+        <button type="submit" style="padding: 5px 10px; background-color: #007BFF; color: white; border: none; border-radius: 4px;">Filter</button>
+    </form>
+
+    {% for date, updates in updates_by_date.items %}
+        <div class="date-header">{{ date }}</div>
+        {% for update in updates %}
+            <div class="update-card">
+                <div class="update-detail">
+                    <strong>Status:</strong> {{ update.status }}
+                </div>
+                <div class="update-detail">
+                    <strong>Progress Update:</strong> {{ update.progress_update }}
+                </div>
+                {% if update.attachments %}
+                    <div class="attachments">
+                        <strong>Attachment:</strong> 
+                        <a href="{{ update.attachments.url }}" target="_blank">View File</a>
+                    </div>
+                {% endif %}
+                <div class="update-detail">
+                    <strong>Updated By:</strong> {{ update.updated_by }}
+                </div>
+                <div class="update-detail">
+                    <strong>Updated At:</strong> {{ update.updated_at }}
+                </div>
+            </div>
+        {% endfor %}
+    {% empty %}
+        <p>No updates available for this task.</p>
+    {% endfor %}
+    <a href="{% url 'tl_status' %}" class="back-link" style="text-decoration: none;">Back to Project Details</a>
+</div>
+
+<script>
+    function toggleCustomDate() {
+        const dateSelect = document.getElementById('date');
+        const customDateInput = document.getElementById('custom_date');
+        if (dateSelect.value === 'custom_date') {
+            customDateInput.style.display = 'inline-block';
+        } else {
+            customDateInput.style.display = 'none';
+        }
+    }
+</script>
+
+
+{% endblock %}
+
+
+
+def tl_dailyupdates(request, task_id):
+    task = Task.objects.get(id=task_id)
+    daily_filter = request.GET.get('date', 'all')  # Get filter from the request
+    custom_date = request.GET.get('custom_date')  # Get custom date if provided
+    task_updates = TaskUpdate.objects.filter(task=task).order_by('-updated_at')  # Default fetch all updates
+
+    if daily_filter == 'custom_date' and custom_date:  # Apply custom date filter
+        try:
+            custom_date_obj = datetime.datetime.strptime(custom_date, "%Y-%m-%d").date()
+            task_updates = task_updates.filter(updated_at__date=custom_date_obj)
+        except ValueError:
+            pass  # Ignore invalid custom dates
+    
+    # Debugging: Print the task updates count and details to check
+    print(f"Task updates count: {task_updates.count()}")  # Check how many updates match the filter
+    
+    # Group updates by date
+    updates_by_date = {}
+    for update in task_updates:
+        date_str = update.updated_at.date()
+        if date_str not in updates_by_date:
+            updates_by_date[date_str] = []
+        updates_by_date[date_str].append(update)
+
+    # Sort the dates in descending order
+    updates_by_date = dict(sorted(updates_by_date.items(), key=lambda item: item[0], reverse=True))
+
+    return render(request, 'tl_dailyupdates.html', {
+        'task': task,
+        'updates_by_date': updates_by_date,
+        'dates': TaskUpdate.objects.filter(task=task).dates('updated_at', 'day', order='DESC'),
+        'daily_filter': daily_filter,
+        'custom_date': custom_date,
+    })
+
+
+
+    table td img {
+        max-width: 60px;
+        height: auto;
+        border-radius: 50%;
+    }
+
+<!-- admintl_details -->
+
+{% extends "admin_base.html" %}
+
+{% block content %}
+<style>
+    /* General Styles */
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f5f5f5;
+    }
+
+    .container {
+        max-width: 90%;
+        margin: 20px auto;
+        padding: 20px;
+        background: #ffffff;
+        border-radius: 10px;
+        box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+        text-align: center;
+        color: #333;
+        margin-bottom: 30px;
+        font-size: 24px;
+    }
+
+    /* Table Styles */
+    .table-wrapper {
+        margin-top: 20px;
+        overflow-x: auto;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    table th, table td {
+        padding: 15px;
+        text-align: left;
+        border: 1px solid #ddd;
+        word-wrap: break-word;
+    }
+
+    table th {
+        background-color: #3498db;
+        color: white;
+        font-size: 16px;
+        font-weight: bold;
+    }
+
+    table td {
+        font-size: 14px;
+        color: #555;
+    }
+
+    /* Hover Effect for Rows */
+    table tbody tr:hover {
+        background-color: #f1f1f1;
+    }
+
+    table td img {
+        max-width: 50px;
+        height: auto;
+        border-radius: 50%;
+    }
+
+    /* Action Buttons */
+    .action-buttons a {
+        display: inline-block;
+        padding: 8px 16px;
+        color: #fff;
+        background-color: #e74c3c;
+        text-decoration: none;
+        border-radius: 5px;
+        font-size: 14px;
+        text-align: center;
+        transition: background-color 0.3s ease;
+    }
+
+    .action-buttons a:hover {
+        background-color: #c0392b;
+    }
+
+    /* Filter Section */
+    .filter-section {
+        margin-bottom: 30px;
+        background-color: #ffffff;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+    }
+
+    .filter-section label {
+        font-size: 16px;
+        color: #333;
+        margin-right: 10px;
+    }
+
+    .filter-section select {
+        padding: 10px 15px;
+        font-size: 16px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        background-color: #fff;
+        transition: all 0.3s ease;
+    }
+
+    .filter-section select:focus {
+        outline: none;
+        border-color: #3498db;
+    }
+
+    .filter-section button {
+        padding: 12px 20px;
+        font-size: 16px;
+        background-color: #3498db;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+    .filter-section button:hover {
+        background-color: #2980b9;
+    }
+
+    /* Responsive Design */
+    @media screen and (max-width: 768px) {
+        
+        .table-wrapper {
+            margin-top: 15px;
+            overflow-x: auto;
+        }
+
+        table th, table td {
+            padding: 12px;
+            font-size: 13px;
+        }
+
+        .action-buttons a {
+            padding: 8px 12px;
+            font-size: 12px;
+        }
+
+        .filter-section {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .filter-section button {
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .filter-section select {
+            width: 100%;
+            margin-bottom: 10px;
+        }
+    }
+
+    @media screen and (max-width: 480px) {
+        h1 {
+            font-size: 20px;
+        }
+
+        .filter-section {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .filter-section button {
+            font-size: 14px;
+            width: 100%;
+            padding: 12px;
+            margin-top: 10px;
+        }
+
+        .filter-section select {
+            font-size: 14px;
+            padding: 8px;
+            width: 75%;
+            margin-bottom: 10px;
+        }
+
+        /* Table changes for mobile view */
+        .table-wrapper {
+            overflow-x: auto;
+            
+        }
+
+        table {
+            overflow-x: auto;
+            display: block;
+            width: 100%;
+        }
+
+        table thead {
+            display: none;
+        }
+
+        table tbody tr {
+            display: block;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 10px;
+            background-color: #f9f9f9;
+        }
+
+        table tbody td {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #ddd;
+        }
+
+        table tbody td::before {
+            content: attr(data-label);
+            flex: 1;
+            font-weight: bold;
+            color: #333;
+            text-transform: capitalize;
+        }
+
+        table td img {
+            max-width: 40px;
+            height: auto;
+            margin-right: 10px;
+        }
+
+        .action-buttons a {
+            padding: 5px 8px;
+            font-size: 10px;
+        }
+    }
+</style>
+
+
+
+<div class="container">
+    <h1>Team Leader Details</h1>
+    
+    <!-- Filter Section -->
+    <div class="filter-section">
+        <form method="GET">
+            <label for="department">Department:</label>
+            <select name="department" id="department">
+                <option value="">All</option>
+                {% for department in departments %}
+                    <option value="{{ department.id }}" {% if request.GET.department == department.id|stringformat:"s" %}selected{% endif %}>{{ department.dept_name }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit">Filter</button>
+        </form>
+    </div>
+    
+    
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Address</th>
+                    <th>Email</th>
+                    <th>Phone Number</th>
+                    <th>Course Completed</th>
+                    <th>Department</th>
+                    <th>Certificate</th>
+                    <th>Delete</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for i in usr %}
+                <tr>
+                    {% if i.user.user_type == 2 %}
+                    <td data-label="Name">
+                        <a href="{% url 'admintl_profile' i.id %}" style="text-decoration: none;">
+                                {{ i.user.first_name }} {{ i.user.last_name }}
+                        </a>
+                    </td>
+                    <td data-label="Address">{{ i.address }}</td>
+                    <td data-label="Email">{{ i.user.email }}</td>
+                    <td data-label="phone">{{ i.phone }}</td>
+                    <td data-label="Course">{{ i.course }}</td>
+                    <td data-label="Department">{{ i.department.dept_name }}</td>
+                    <td data-label="Certificate">
+                        <a href="{{ i.certificate.url }}" download>
+                            <img src="{{ i.certificate.url }}" alt="{{ i.user.first_name }} {{ i.user.last_name }}">
+                        </a>
+                        <br>
+                        <a href="{{ i.certificate.url }}" download class="action-buttons">
+                            Download
+                        </a>
+                    </td>
+                    <td data-label="Delete" class="action-buttons">
+                        <a href="{% url 'delete_devp' i.id %}" class="delete">Delete</a>
+                    </td>
+                    {% endif %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    
+</div>
+
+{% endblock %}

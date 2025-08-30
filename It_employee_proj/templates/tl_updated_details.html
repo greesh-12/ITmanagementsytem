@@ -1,0 +1,203 @@
+{% extends 'tl_base.html' %}
+
+{% block content %}
+
+<style>
+/* General styling */
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f8f9fa;
+    margin: 0;
+    padding: 0;
+}
+
+.page-title {
+    text-align: center;
+    padding: 20px 0;
+    background-color: #007BFF;
+    color: white;
+    margin-bottom: 20px;
+    font-size: 28px;
+}
+
+/* Filter form */
+.filter-form {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 20px;
+    gap: 10px;
+}
+
+.filter-label {
+    font-size: 16px;
+    align-self: center;
+}
+
+.filter-select {
+    width: 100%;
+    max-width: 100px;
+    padding: 8px;
+    font-size: 14px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+/* Card layout */
+.card-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    padding: 0 20px;
+}
+
+.project-card {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: transform 0.2s ease-in-out;
+}
+
+.project-card:hover {
+    transform: translateY(-5px);
+}
+
+.card-header {
+    background-color: #007BFF;
+    color: white;
+    padding: 15px;
+    font-size: 18px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.card-content {
+    padding: 15px;
+    font-size: 14px;
+    color: #333;
+}
+
+.card-content p {
+    margin: 5px 0;
+    line-height: 1.5;
+}
+
+.card-footer {
+    background-color: #f8f9fa;
+    padding: 10px;
+    text-align: center;
+}
+
+.card-footer a {
+    color: #007BFF;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.card-footer a:hover {
+    text-decoration: underline;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+    .page-title {
+        font-size: 22px;
+        padding: 15px 0;
+    }
+
+    .filter-label {
+        font-size: 14px;
+    }
+
+    .filter-select {
+        font-size: 13px;
+    }
+
+    .project-card {
+        font-size: 13px;
+    }
+}
+</style>
+
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            <!-- <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button> -->
+            {{ message }}
+        </div>
+    {% endfor %}
+{% endif %}
+
+<h1 class="page-title">Team Leader: Project Details</h1>
+
+<!-- Filter Form -->
+<form method="GET" class="filter-form">
+    <!-- Daily Updates Filter -->
+    <label for="daily" class="filter-label">Filter By:</label>
+    <select name="daily" id="daily" class="filter-select-sm" onchange="this.form.submit()">
+        <option value="all" {% if daily_filter == 'all' %}selected{% endif %}>All Updates</option>
+        <option value="today" {% if daily_filter == 'today' %}selected{% endif %}>Today's Updates</option>
+    </select>
+
+    <!-- Project Dropdown Filter -->
+    <!-- <label for="project" class="filter-label">Project:</label> -->
+    <select name="project" id="project" class="filter-select-sm" onchange="this.form.submit()">
+        <option value="all" {% if project_filter == 'all' %}selected{% endif %}>All Projects</option>
+        {% for project in all_projects %}
+            <option value="{{ project.id }}" {% if project_filter == project.id|stringformat:"s" %}selected{% endif %}>
+                {{ project.project_name }}
+            </option>
+        {% endfor %}
+    </select>
+</form>
+
+<!-- Projects Card Section -->
+<div class="card-container">
+    {% if projects %}
+        {% for project in projects %}
+            <div class="project-card">
+                <div class="card-header">{{ project.project_name }}</div>
+                <div class="card-content">
+                    <p><strong>Description:</strong> {{ project.description }}</p>
+                    <p><strong>Requirements:</strong> {{ project.requirements }}</p>
+                    <p><strong>Start Date:</strong> {{ project.start_date|date:"Y-m-d" }}</p>
+                    <p><strong>End Date:</strong> {{ project.end_date|date:"Y-m-d" }}</p>
+                    <p><strong>Status:</strong> 
+                        {% if project.updates.last %}
+                            <span class="status">{{ project.updates.last.status }}</span>
+                        {% else %}
+                            <span class="status">Not Updated</span>
+                        {% endif %}
+                    </p>
+                    <p><strong>Last Updated:</strong> 
+                        {% if project.updates.last %}
+                            {{ project.updates.last.update_date|date:"Y-m-d" }}
+                        {% else %}
+                            Never Updated
+                        {% endif %}
+                    </p>
+                    <p><strong>Latest Attachment:</strong>
+                        {% if project.updates.last and project.updates.last.attachment %}
+                            <a href="{{ project.updates.last.attachment.url }}" download>Download</a>
+                        {% else %}
+                            No Attachments
+                        {% endif %}
+                    </p>
+                </div>
+                <div class="card-footer">
+                    <a href="{% url 'tl_updates' project.id %}">Update Project</a> | 
+                    <a href="{% url 'tl_daily_progress' project.id %}">View Daily Work Progress</a>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <center><p class="no-projects">No projects assigned to you.</p></center>
+    {% endif %}
+</div><br><br><br><br><br><br><br><br>
+
+
+
+{% endblock %}

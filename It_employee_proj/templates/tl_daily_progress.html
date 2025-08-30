@@ -1,0 +1,241 @@
+{% extends 'tl_base.html' %}
+
+{% block content %}
+<style>
+    /* General Styling */
+    body {
+        font-family: 'Arial', sans-serif;
+        background-color: #f8f9fa;
+        margin: 0;
+        padding: 0;
+        color: #333;
+    }
+
+    .page-title {
+        text-align: center;
+        padding: 20px;
+        background-color: #007bff;
+        color: white;
+        margin-bottom: 20px;
+        font-size: 24px;
+    }
+
+    /* Filter Form */
+    .filter-form {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 20px;
+        gap: 15px;
+        align-items: center;
+    }
+
+    .filter-container {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+
+    .filter-label {
+        font-size: 16px;
+        color: #333;
+    }
+
+    .filter-select,
+    .filter-input {
+        padding: 10px;
+        font-size: 16px;
+        border-radius: 6px;
+        border: 1px solid #ddd;
+        background-color: #fff;
+    }
+
+    .filter-button {
+        padding: 12px 20px;
+        background-color: #28a745;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-size: 16px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+
+    .filter-button:hover {
+        background-color: #218838;
+    }
+
+    /* Table Styling */
+    .table-container {
+        width: 90%;
+        max-width: 1200px;
+        margin: 0 auto;
+        overflow-x: auto;
+        background-color: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .updates-table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: left;
+    }
+
+    .updates-table th, .updates-table td {
+        padding: 14px;
+        border: 1px solid #ddd;
+    }
+
+    .updates-table th {
+        background-color: #007bff;
+        color: white;
+        text-transform: uppercase;
+        font-size: 16px;
+    }
+
+    .updates-table tr:nth-child(even) {
+        background-color: #f7f7f7;
+    }
+
+    .updates-table tr:hover {
+        background-color: #e1e7f1;
+        cursor: pointer;
+    }
+
+    .view-attachment {
+        color: #007bff;
+        text-decoration: none;
+        font-weight: bold;
+    }
+
+    .view-attachment:hover {
+        text-decoration: underline;
+    }
+
+    /* Back Link */
+    .back-link {
+        display: block;
+        text-align: center;
+        margin-top: 20px;
+        font-size: 16px;
+        color: #007bff;
+        text-decoration: none;
+        font-weight: bold;
+    }
+
+    .back-link:hover {
+        text-decoration: underline;
+    }
+
+    /* Responsive Styles */
+    @media (max-width: 768px) {
+        .page-title {
+            font-size: 22px;
+            padding: 15px 0;
+        }
+
+        .filter-label,
+        .filter-select,
+        .filter-input {
+            font-size: 14px;
+            
+        }
+
+        .updates-table th, .updates-table td {
+            font-size: 14px;
+            padding: 10px;
+        }
+
+        .filter-form {
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .filter-button {
+            width: 100%;
+            margin-top: 10px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .page-title {
+            font-size: 20px;
+        }
+
+        .updates-table th, .updates-table td {
+            font-size: 12px;
+        }
+
+        .filter-form {
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .filter-label {
+            margin-bottom: 5px;
+        }
+
+        .filter-select,
+        .filter-input {
+            width: 65%;
+            margin-bottom: 10px;
+        }
+    }
+</style>
+
+<h1 class="page-title">{{ project.project_name }} - Daily Updates</h1>
+
+<!-- Filter Section -->
+<form method="GET" class="filter-form">
+    <label for="daily" class="filter-label">Filter by:</label>
+    <select name="daily" id="daily" class="filter-select-sm">
+        <option value="today" class="filter-option" {% if daily_filter == 'today' %}selected{% endif %}>Today's Updates</option>
+        <option value="custom_date" {% if daily_filter == 'custom_date' %}selected{% endif %}>Custom Date</option>
+    </select>
+
+    {% if daily_filter == 'custom_date' %}
+        <input type="date" name="date" value="{{ today|date:'Y-m-d' }}" class="filter-input" />
+    {% endif %}
+    
+    <button type="submit" class="filter-button">Apply Filter</button>
+</form>
+
+<!-- Updates Table -->
+{% if updates %}
+    <div class="table-container">
+        <table class="updates-table">
+            <thead>
+                <tr>
+                    <th>Update Date</th>
+                    <th>Status</th>
+                    <th>Comments</th>
+                    <th>Attachment</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for update in updates %}
+                    <tr>
+                        <td>{{ update.update_date|date:"Y-m-d" }}</td>
+                        <td>{{ update.get_status_display }}</td>
+                        <td>{{ update.comments }}</td>
+                        <td>
+                            {% if update.attachment %}
+                                <a href="{{ update.attachment.url }}" target="_blank">View Attachment</a>
+                            {% else %}
+                                No attachment
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% else %}
+    <center><p>No updates for the selected Date.</p></center>
+{% endif %}
+
+<a href="{% url 'tl_updated_details' %}" class="back-link">Back to Projects</a>
+<br><br><br><br><br><br>
+{% endblock %}

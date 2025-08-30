@@ -1,0 +1,154 @@
+{% extends 'admin_base.html' %}
+
+{% block content %}
+{% load static %}
+<style>
+    /* Global Styles */
+    body {
+        font-family: Arial, sans-serif;
+        background-image: url('{% static "images/home4.webp" %}');
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+        margin: 0;
+        padding: 0;
+        color: #fff; /* Text color for better readability */
+    }
+
+    .content-wrapper {
+        padding: 20px;
+        background-color: rgba(0, 0, 0, 0.5); /* Add semi-transparent background to content */
+        border-radius: 10px; /* Rounded corners for the content */
+        max-width: 1200px;
+        margin: 40px auto;
+        text-align: center; /* Centering text */
+    }
+
+    h1 {
+        font-size: 2.5rem;
+        margin-bottom: 15px;
+    }
+
+    p {
+        font-size: 1.2rem;
+        margin-bottom: 30px;
+    }
+
+    /* Card container for dashboard information */
+    .dashboard-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin-top: 30px;
+    }
+
+    .card {
+        background-color: rgba(255, 255, 255, 0.2); /* Semi-transparent background for cards */
+        padding: 20px;
+        border-radius: 8px;
+        color: #fff;
+        text-align: center;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .card h4 {
+        font-size: 1.6rem;
+        margin-bottom: 10px;
+    }
+
+    .card p {
+        font-size: 1rem;
+        margin-bottom: 15px;
+    }
+
+    .btn-dashboard {
+        background-color: #ffc107;
+        color: #212529;
+        border: none;
+        padding: 10px 20px;
+        font-size: 1rem;
+        cursor: pointer;
+        border-radius: 5px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-dashboard:hover {
+        background-color: #e0a800;
+    }
+
+    /* Responsive Design */
+    @media screen and (max-width: 768px) {
+        h1 {
+            font-size: 2rem;
+        }
+
+        p {
+            font-size: 1rem;
+        }
+
+        .content-wrapper {
+            padding: 15px;
+            margin: 20px auto;
+        }
+
+        .card {
+            padding: 15px;
+        }
+    }
+
+    @media screen and (max-width: 480px) {
+        h1 {
+            font-size: 1.5rem;
+        }
+
+        p {
+            font-size: 0.9rem;
+        }
+
+        .content-wrapper {
+            padding: 10px;
+            margin: 10px auto;
+        }
+    }
+</style>
+
+<div class="content-wrapper">
+    <h1>Welcome to Admin Dashboard</h1>
+    <p>Manage your site settings and content from here.</p>
+
+    <!-- Dashboard Cards Section -->
+    <div class="dashboard-cards">
+        <div class="card">
+            <h4>Projects</h4>
+            <p>View and manage all your ongoing projects</p>
+            <a href="{% url 'project_details' %}" class="btn-dashboard">Go to Projects</a>
+        </div>
+        <div class="card">
+            <h4>Team Leader Details</h4>
+            <p>See the list of  team leaders</p>
+            <a href="{% url 'admintl_details' %}" class="btn-dashboard">View Team</a>
+        </div>
+        <div class="card">
+            <h4>Developer Details</h4><br>
+            <p>See the list of  Developers</p>
+            <a href="{% url 'admindevp_details' %}" class="btn-dashboard">Manage Tasks</a>
+        </div>
+        <div class="card">
+            <h4>Previous Employer Details</h4>
+            <p>The list of previous employer</p>
+            <a href="{% url 'admin_prev_team' %}" class="btn-dashboard">View Status</a>
+        </div>
+    </div>
+
+    <!-- Optional Section: Notifications or Updates -->
+    <div class="mt-5">
+        <h3>Latest Notifications</h3>
+        <ul>
+            <li>New project added: <strong>Website Redesign</strong></li>
+            <li>Task update: <strong>Complete Backend Development</strong></li>
+            <li>Team Leader meeting scheduled for next week.</li>
+        </ul>
+    </div>
+</div>
+
+{% endblock %}

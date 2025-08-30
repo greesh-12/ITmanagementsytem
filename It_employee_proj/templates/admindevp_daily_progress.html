@@ -1,0 +1,172 @@
+{% extends 'admin_base.html' %}
+
+{% block content %}
+
+<style>
+    /* Basic container styles */
+    .container {
+        max-width: 1200px;
+        margin: 20px auto;
+        padding: 20px;
+        font-family: 'Arial', sans-serif;
+        background-color: #f9f9f9;
+        border-radius: 8px;
+    }
+
+    /* Page title styling */
+    .page-title {
+        text-align: center;
+        font-size: 2em;
+        margin-bottom: 40px;
+        color: #007BFF;
+    }
+
+    /* Project title styles */
+    .project-title {
+        color: #0056b3;
+        font-size: 1.5em;
+        margin-bottom: 20px;
+        border-bottom: 2px solid #ddd;
+        padding-bottom: 10px;
+    }
+
+    /* Task update section */
+    .task-section {
+        background-color: white;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 30px;
+    }
+
+    /* Update list and item styles */
+    .update-list {
+        list-style-type: none;
+        padding: 0;
+    }
+
+    .update-item {
+        background-color: #f9f9f9;
+        padding: 15px;
+        margin-bottom: 15px;
+        border-radius: 5px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .update-item strong {
+        color: #333;
+        font-weight: bold;
+    }
+
+    .progress-update {
+        margin-top: 10px;
+        color: #555;
+    }
+
+    .attachment-link {
+        display: inline-block;
+        margin-top: 10px;
+        color: #007BFF;
+        text-decoration: none;
+        font-size: 14px;
+    }
+
+    .attachment-link:hover {
+        text-decoration: underline;
+    }
+
+    /* Message for no updates */
+    .no-updates {
+        color: #dc3545;
+        font-style: italic;
+    }
+
+    /* Go back link styling */
+    .back-link {
+        display: inline-block;
+        margin-top: 30px;
+        padding: 10px 20px;
+        background-color: #007BFF;
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+        font-size: 16px;
+    }
+
+    .back-link:hover {
+        background-color: #0056b3;
+        color: white;
+    }
+    
+
+    /* Responsive styles for smaller screens */
+    @media screen and (max-width: 768px) {
+        .container {
+            padding: 15px;
+        }
+
+        .page-title {
+            font-size: 1.5em;
+        }
+
+        .project-title {
+            font-size: 1.2em;
+        }
+
+        .update-item {
+            font-size: 14px;
+        }
+
+        .progress-update {
+            font-size: 13px;
+        }
+
+        .back-link {
+            padding: 8px 15px;
+            font-size: 14px;
+        }
+    }
+</style>
+
+
+<div class="container">
+    <h1 class="page-title">Daily Progress for {{ developer.first_name }} {{ developer.last_name }}</h1>
+
+    <!-- Date Filter Form -->
+    <form method="GET" action="" style="text-align: center; margin-bottom: 20px;">
+        <label for="date">Filter by Date: </label>
+        <input type="date" class="form-control-sm"  name="date" id="date" value="{{ filter_date|date:'Y-m-d' }}" />
+        <button type="submit" class="btn btn-primary">Filter</button>
+    </form>
+
+    {% if task_updates %}
+        {% for task, data in task_updates.items %}
+        <div class="task-section">
+            <h2 class="project-title">{{ data.project.project_name }}</h2>  <!-- Display the project name -->
+
+            <h3>Task Updates</h3>
+            {% if data.updates %}
+            <ul class="update-list">
+                {% for update in data.updates %}
+                <li class="update-item">
+                    <strong>Updated at : {{ update.updated_at|date:"Y-m-d"|default:"Not available" }} {{ update.updated_at|time:"H:i" }}</strong>
+                    <p class="progress-update">status:{{ update.status }}</p>
+                    <p class="progress-update">{{ update.progress_update }}</p>
+                    {% if update.attachments %}
+                    <a class="attachment-link" href="{{ update.attachments.url }}" target="_blank">View Attachment</a>
+                    {% endif %}
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p class="no-updates">No updates for this task yet.</p>
+            {% endif %}
+        </div>
+        {% endfor %}
+    {% else %}
+        <p class="no-updates">No tasks or updates found for this developer in the selected project.</p>
+    {% endif %}
+    
+    <a href="{% url 'admin_devptask_status' %}" style="text-decoration: none;" class="back-link">Go Back</a>
+</div>
+{% endblock %}

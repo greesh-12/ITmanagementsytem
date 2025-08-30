@@ -1,0 +1,108 @@
+{% extends 'tl_base.html' %}
+
+{% block content %}
+{% load static %}
+
+<style>
+    body {
+        background-image: url('{% static "images/home3.jpeg" %}');
+        background-size: cover;
+        background-attachment: fixed;
+        background-position: center;
+        color: #fff;
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+    }
+    .content-wrapper {
+        background: rgba(0, 0, 0, 0.7);
+        padding: 20px;
+        border-radius: 10px;
+        margin: 50px auto;
+        max-width: 1200px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+    }
+    h2 {
+        color: #f8f9fa;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    .team-info {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-around;
+        gap: 20px;
+    }
+    .card {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+        padding: 20px;
+        text-align: center;
+        flex: 1 1 300px;
+        max-width: 300px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+    .card h3 {
+        color: #f8f9fa;
+        margin-bottom: 10px;
+    }
+    .card p {
+        color: #dcdcdc;
+        font-size: 0.9rem;
+    }
+    .btn {
+        background: #007bff;
+        color: #fff;
+        padding: 10px 15px;
+        text-decoration: none;
+        border-radius: 5px;
+        display: inline-block;
+        margin-top: 10px;
+    }
+    .btn:hover {
+        background: #0056b3;
+    }
+    @media (max-width: 768px) {
+        .content-wrapper {
+            padding: 15px;
+        }
+        .card {
+            flex: 1 1 100%;
+        }
+    }
+</style>
+
+<div class="content-wrapper">
+    <h2>Welcome, Team Leader!</h2>
+    <div class="team-info">
+        <div class="card">
+            <h3>Team Goals</h3>
+            <p>Define, track, and achieve the objectives set for your team.</p>
+            <!-- <a href="/team-goals" class="btn">View Goals</a> -->
+        </div>
+        <div class="card">
+            <h3>Resource Management</h3>
+            <p>Allocate and monitor resources to ensure project efficiency.</p>
+            <!-- <a href="/resources" class="btn">Manage Resources</a> -->
+        </div>
+        <div class="card">
+            <h3>Communication Hub</h3>
+            <p>Streamline team communication and collaboration.</p>
+            <!-- <a href="/communication" class="btn">Open Hub</a> -->
+        </div>
+        <div class="card">
+            <h3>Performance Insights</h3>
+            <p>Analyze and improve team performance with actionable data.</p>
+            <!-- <a href="/performance" class="btn">View Insights</a> -->
+        </div>
+    </div>
+    <div class="company-info" style="margin-top: 40px; text-align: center;">
+        <h3 style="color: #f8f9fa;">About Our Company</h3>
+        <p style="color: #dcdcdc; max-width: 800px; margin: 0 auto;">
+            Our company is dedicated to delivering innovative solutions that empower teams to achieve excellence. With a focus on collaboration, efficiency, and performance, we strive to create a supportive and dynamic environment for our employees and clients alike.
+        </p>
+    </div>
+</div>
+
+{% endblock %}

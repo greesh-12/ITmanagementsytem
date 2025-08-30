@@ -1,0 +1,106 @@
+{% extends 'admin_base.html' %}
+
+{% block content %}
+{% load static %}
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f8f9fa;
+        margin: 0;
+        padding: 0;
+    }
+
+    .form-container {
+        max-width: 800px;
+        margin: 30px auto;
+        background: #ffffff;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    label {
+        font-weight: bold;
+    }
+
+    .btn-primary {
+        background-color: #007bff;
+        border: none;
+    }
+
+    .btn-primary:hover {
+        background-color: #0056b3;
+    }
+
+    @media (max-width: 768px) {
+        .form-container {
+            padding: 15px;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+        }
+    }
+</style>
+
+<div class="form-container">
+    {% if messages %}
+        {% for message in messages %}
+            <p style="color: green;">{{ message }}</p>
+        {% endfor %}
+    {% endif %}
+    <h1>Add Project Information</h1>
+    <form action="{% url 'add_project' %}" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <!-- Client Details -->
+        <div class="mb-3">
+            <label for="clientName" class="form-label">Client Name</label>
+            <input type="text" class="form-control" id="clientName" name="client_name" placeholder="Enter client name" required>
+        </div>
+        <div class="mb-3">
+            <label for="clientEmail" class="form-label">Client Email</label>
+            <input type="email" class="form-control" id="clientEmail" name="client_email" placeholder="Enter client email" required>
+        </div>
+
+        <!-- Project Details -->
+        <div class="mb-3">
+            <label for="projectName" class="form-label">Project Name</label>
+            <input type="text" class="form-control" id="projectName" name="project_name" placeholder="Enter project name" required>
+        </div>
+        <div class="mb-3">
+            <label for="projectDescription" class="form-label">Project Description</label>
+            <textarea class="form-control" id="projectDescription" name="description" rows="4" placeholder="Enter project description" required></textarea>
+        </div>
+        <div class="mb-3">
+            <label for="projectRequirements" class="form-label">Project Requirements</label>
+            <textarea class="form-control" id="projectRequirements" name="requirements" rows="4" placeholder="List project requirements" required></textarea>
+        </div>
+
+        <!-- Dates -->
+        <div class="mb-3">
+            <label for="startDate" class="form-label">Start Date</label>
+            <input type="date" class="form-control" id="startDate" name="start_date" required>
+        </div>
+        <div class="mb-3">
+            <label for="endDate" class="form-label">End Date</label>
+            <input type="date" class="form-control" id="endDate" name="end_date" required>
+        </div>
+
+        <!-- Attachments -->
+        <div class="mb-3">
+            <label for="attachments" class="form-label">Attachments</label>
+            <input type="file" class="form-control" id="attachments" name="attachments" accept="attachments/*" multiple>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" class="btn btn-primary w-100">Submit</button>
+    </form>
+</div>
+
+{% endblock %}

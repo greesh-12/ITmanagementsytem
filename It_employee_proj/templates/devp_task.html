@@ -1,0 +1,295 @@
+{% extends 'devp_base.html' %}
+
+{% block content %}
+{% load static %}
+
+<style>
+    body {
+        background-color: #f8f9fa;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .task-table-container {
+        margin: 20px auto;
+        padding: 20px;
+        background-color: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+        text-align: center;
+        color: #343a40;
+        margin-bottom: 20px;
+        font-size: 24px;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+        font-size: 14px;
+    }
+
+    table thead th {
+        background-color: #007bff;
+        color: #ffffff;
+        padding: 12px;
+        text-align: left;
+    }
+
+    table tbody tr {
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    table tbody tr:nth-child(even) {
+        background-color: #f8f9fa;
+    }
+
+    table tbody td {
+        padding: 12px;
+        text-align: left;
+    }
+
+    .daily-update-btn {
+        display: inline-block;
+        padding: 6px 12px;
+        background-color: #28a745;
+        color: #ffffff;
+        border: none;
+        border-radius: 5px;
+        text-decoration: none;
+        font-size: 13px;
+    }
+
+    .daily-update-btn:hover {
+        background-color: #218838;
+        color: #ffffff;
+    }
+
+    .no-tasks {
+        text-align: center;
+        font-size: 16px;
+        color: #6c757d;
+    }
+
+    .back-link {
+        display: inline-block;
+        text-align: center;
+        color: #007bff;
+        text-decoration: none;
+        font-weight: bold;
+        margin-top: 15px;
+    }
+
+    .back-link:hover {
+        color: #0056b3;
+        text-decoration: underline;
+    }
+
+    /* Filter form styling */
+    .filter-form {
+        width: 100%;
+        max-width: 600px;
+        margin: 20px auto;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        background-color: #f9f9f9;
+        padding: 15px;
+        border-radius: 8px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .filter-label {
+        font-size: 1.1em;
+        color: #333;
+        font-weight: bold;
+    }
+
+    .filter-select {
+        padding: 10px;
+        font-size: 1em;
+        width: 100%;
+        max-width: 300px;
+        border-radius: 5px;
+        border: 1px solid #ddd;
+        background-color: #fff;
+        color: #333;
+        box-sizing: border-box;
+        transition: border-color 0.3s ease;
+    }
+
+    .filter-select:focus {
+        border-color: #007bff;
+        outline: none;
+    }
+
+        /* Add this to your CSS file */
+.alert {
+    padding: 1rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 500;
+    border: 1px solid transparent;
+}
+
+.alert-success {
+    background-color: #76e991;
+    border-color: #c3e6cb;
+    color: #155724;
+}
+
+.alert-danger {
+    background-color: #dd5c67;
+    border-color: #f5c6cb;
+    color: #721c24;
+}
+
+.alert-warning {
+    background-color: #fff3cd;
+    border-color: #ffeeba;
+    color: #856404;
+}
+
+.alert-info {
+    background-color: #92ccd6;
+    border-color: #bee5eb;
+    color: #0c5460;
+}
+
+    @media (max-width: 768px) {
+        .filter-form {
+            width: 90%;
+        }
+
+        .filter-select {
+            width: 60%;
+        }
+
+        
+
+        table tbody td {
+            display: block;
+            text-align: left;
+            padding: 15px;
+            border-bottom: 1px solid #ddd;
+            position: relative;
+        }
+
+        table tbody td::before {
+            content: attr(data-label);
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+            color: #007bff;
+        }
+
+        table thead {
+            display: none;
+        }
+
+        h1 {
+            font-size: 18px;
+        }
+
+        .daily-update-btn {
+            width: 100%;
+            padding: 10px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .filter-form {
+            padding: 10px;
+        }
+
+        .filter-select {
+            padding: 10px;
+            font-size: 0.9em;
+        }
+
+        h1 {
+            font-size: 16px;
+        }
+
+        .daily-update-btn {
+            padding: 8px;
+            font-size: 0.85em;
+        }
+    }
+</style>
+
+<div class="container">
+    <h1>Tasks Assigned to You</h1>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="GET" class="filter-form">
+        <label for="project" class="filter-label">Filter by Project:</label>
+        <select name="project" id="project" class="filter-select" onchange="this.form.submit()">
+            <option value="all" {% if selected_project_id == '' or selected_project_id == 'all' %}selected{% endif %}>All Projects</option>
+            {% for project in projects %}
+                <option value="{{ project.id }}" {% if selected_project_id == project.id|stringformat:"s" %}selected{% endif %}>
+                    {{ project.project_name }}
+                </option>
+            {% endfor %}
+        </select>
+    </form>
+
+    <div class="task-table-container">
+        {% if tasks %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Project Name</th>
+                        <th>Module Name</th>
+                        <th>Module Description</th>
+                        <th>Attachments</th>
+                        <th>End Date</th>
+                        <th>Status</th>
+                        <th>Assigned Date</th>
+                        <th>Daily Updates</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for task in tasks %}
+                        <tr>
+                            <td data-label="Project Name">{{ task.project.project_name }}</td>
+                            <td data-label="Module Name">{{ task.module.module_name }}</td>
+                            <td data-label="Module Description">{{ task.module.description }}</td>
+                            <td data-label="Attachments">
+                                {% if task.project.attachments %}
+                                    <a href="{{ task.project.attachments.url }}" download>Download</a>
+                                {% else %}
+                                    No Attachments
+                                {% endif %}
+                            </td>
+                            <td data-label="End Date">{{ task.project.end_date }}</td>
+                            <td data-label="Status">{{ task.status }}</td>
+                            <td data-label="Assigned Date">{{ task.assigned_at|date:"Y-m-d H:i:s" }}</td>
+                            <td>
+                                <a href="{% url 'update_task' task_id=task.id %}" class="daily-update-btn">Update</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p class="no-tasks">No tasks have been assigned to you yet.</p>
+        {% endif %}
+        <a href="{% url 'devp_home' %}" class="back-link">Back to Dashboard</a>
+    </div>
+</div>
+
+
+{% endblock %}

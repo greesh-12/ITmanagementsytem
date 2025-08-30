@@ -1,0 +1,162 @@
+{% extends 'admin_base.html' %}
+
+{% block content %}
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f9f9f9;
+        margin: 0;
+        padding: 0;
+    }
+
+    .container {
+        max-width: 90%;
+        margin: 20px auto;
+        padding: 20px;
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+        text-align: center;
+        color: #333;
+        margin-bottom: 20px;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
+    table th, table td {
+        border: 1px solid #ddd;
+        padding: 10px;
+        text-align: left;
+    }
+
+    table th {
+        background-color: #f4f4f4;
+        font-weight: bold;
+    }
+    .action-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 30px;
+        padding-bottom: 33px;
+        
+
+    }
+
+    .action-buttons a {
+        
+        padding: 8px 12px;
+        color: #fff;
+        text-decoration: none;
+        border-radius: 5px;
+        font-size: 14px;
+        text-align: center;
+        background-color: blue;
+        transition: background-color 0.3s ease;
+    }
+
+    .action-buttons a:hover {
+        background-color: #0056b3;
+    }
+
+    /* Responsive Design */
+    @media screen and (max-width: 768px) {
+        table th, table td {
+            font-size: 14px;
+            padding: 8px;
+        }
+
+        .action-buttons a {
+            font-size: 12px;
+            padding: 8px 10px;
+        }
+
+        h1 {
+            font-size: 20px;
+        }
+    }
+    @media screen and (max-width: 480px) {
+        table {
+            display: block;
+            overflow-x: auto;
+        }
+
+        th, td {
+            font-size: 12px;
+            padding: 8px;
+        }
+
+
+
+        .action-buttons {
+            flex-direction: column;
+            gap: 5px;
+            align-items: stretch;
+        }
+
+        .action-buttons a {
+            width: 100%;
+            text-align: center;
+        }
+    }
+</style>
+
+<div class="container">
+    <h1>All Projects</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Project Name</th>
+                <th>Client Name</th>
+                <th>Client email</th>
+                <th>Description</th>
+                <th>Requirements</th>
+                <th>Start date</th>
+                <th>end date</th>
+                <th>Attachments</th>
+                <th>Team Leader</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for project in projects %}
+            <tr>
+                <td>{{ project.project_name }}</td>
+                <td>{{ project.client_name }}</td>
+                <td>{{ project.client_email }}</td>
+                <td>{{ project.description }}</td>
+                <td>{{ project.requirements }}</td>
+                <td>{{project.start_date}}</td>
+                <td>{{project.end_date}}</td>
+                <td>
+                    {% if project.attachments %}
+                    <a href="{{ project.attachments.url }}" download>Download</a>
+                    {% else %}
+                    No Attachments
+                    {% endif %}
+                </td>
+                <td>
+                    {% if project.team_leader %}
+                        {{ project.team_leader.user.first_name }} {{ project.team_leader.user.last_name }}
+                    {% else %}
+                        Not Assigned
+                    {% endif %}
+                </td>
+                <td class="action-buttons">
+                    <a href="{% url 'edit_project' project.id %}">Edit</a>
+                    <a href="{% url 'delete_project' project.id %}">Delete</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

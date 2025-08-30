@@ -1,0 +1,131 @@
+{% extends 'tl_base.html' %}
+
+{% block content %}
+{% load static %}
+
+<style>
+    body {
+        font-family: 'Arial', sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f5f5f5;
+        color: #333;
+    }
+
+    header {
+        background-color: #3f51b5;
+        color: white;
+        padding: 1.5rem;
+        text-align: center;
+        font-size: 1.75rem;
+        font-weight: 600;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .container-notification {
+        max-width: 900px;
+        margin: 2rem auto;
+        padding: 2rem;
+        background-color: #ffffff;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        border-radius: 12px;
+    }
+
+    .notification-list {
+        list-style-type: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .notification-item {
+        border: 1px solid #ddd;
+        padding: 1.25rem;
+        margin-bottom: 1.5rem;
+        border-radius: 10px;
+        background-color: #f9f9f9;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .notification-item:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+    }
+
+    .notification-item h3 {
+        font-size: 1.25rem;
+        color: #333;
+        margin-bottom: 0.5rem;
+    }
+
+    .notification-item p {
+        font-size: 1rem;
+        color: #555;
+    }
+
+    .notification-item .dates {
+        font-size: 0.9rem;
+        color: #888;
+        margin-top: 1rem;
+    }
+
+    .latest-notification {
+        background-color: #e3f2fd;
+        border: 1px solid #1e88e5;
+        font-weight: bold;
+        transform: scale(1.02);
+    }
+    .notification-icon {
+    position: relative;
+    font-size: 2rem;
+    cursor: pointer;
+}
+
+
+
+
+
+
+    /* Mobile Responsiveness */
+    @media (max-width: 768px) {
+        .container-notification {
+            padding: 1.5rem;
+            margin: 1rem;
+        }
+
+        .notification-item h3 {
+            font-size: 1.1rem;
+        }
+
+        .notification-item p {
+            font-size: 0.9rem;
+        }
+    }
+</style>
+
+<header>
+    <h1>Notifications</h1>
+</header>
+
+<div class="container-notification">
+    <div class="notification-list">
+        {% for notification in notifications %}
+            {% if forloop.first %}
+                <li class="notification-item latest-notification">
+                    <h3>{{ notification.message }}</h3>
+                    <p>{{ notification.created_at|date:"M d, Y H:i" }}</p>
+                    <div class="dates">Received on: {{ notification.created_at|date:"M d, Y H:i" }}</div>
+                </li>
+            {% else %}
+                <li class="notification-item">
+                    <h3>{{ notification.message }}</h3>
+                    <p>{{ notification.created_at|date:"M d, Y H:i" }}</p>
+                    <div class="dates">Received on: {{ notification.created_at|date:"M d, Y H:i" }}</div>
+                </li>
+            {% endif %}
+        {% empty %}
+            <li>No new notifications.</li>
+        {% endfor %}
+    </div>
+</div>
+
+{% endblock %}

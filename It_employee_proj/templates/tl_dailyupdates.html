@@ -1,0 +1,250 @@
+{% extends 'tl_base.html' %}
+
+{% block content %}
+{% load static %}
+
+<style>
+    /* General Styles */
+    body {
+        font-family: 'Arial', sans-serif;
+        background-color: #f0f4f8;
+        margin: 0;
+        padding: 0;
+        color: #333;
+    }
+
+    .container-updates {
+        width: 90%;
+        max-width: 1000px;
+        margin: 40px auto;
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        padding: 30px;
+    }
+
+    h1 {
+        color: #007BFF;
+        font-size: 2em;
+        margin-bottom: 30px;
+        text-align: center;
+    }
+
+    .date-header {
+        color: #0056b3;
+        font-size: 1.3em;
+        margin-bottom: 15px;
+        border-bottom: 2px solid #007BFF;
+        padding-bottom: 10px;
+    }
+
+    .update-card {
+        background-color: #f9f9f9;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .update-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .update-detail {
+        margin-bottom: 12px;
+    }
+
+    .update-detail strong {
+        color: #555;
+    }
+
+    .attachments {
+        display: inline-block;
+        margin-top: 10px;
+    }
+
+    .attachments a {
+        color: #007BFF;
+        text-decoration: none;
+    }
+
+    .attachments a:hover {
+        text-decoration: underline;
+    }
+
+    .back-link {
+        display: inline-block;
+        background-color: #007BFF;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 6px;
+        text-decoration: none;
+        font-size: 1.2em;
+        margin-top: 30px;
+        text-align: center;
+    }
+
+    .back-link:hover {
+        background-color: #0056b3;
+        color: white;
+    }
+
+    /* Styling for the filter form container */
+    .filter-date-form {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-bottom: 30px;
+        padding: 20px;
+        background-color: #f9f9f9;
+        border-radius: 8px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Label styling */
+    .filter-label {
+        font-size: 1.1em;
+        color: #333;
+        font-weight: bold;
+        margin-right: 15px;
+    }
+
+    /* Date input styling */
+    .date-input {
+        padding: 10px;
+        font-size: 1em;
+        border-radius: 5px;
+        border: 1px solid #ddd;
+        background-color: #fff;
+        color: #333;
+        margin-right: 15px;
+        transition: border-color 0.3s ease;
+    }
+
+    /* Date input focus effect */
+    .date-input:focus {
+        border-color: #007BFF;
+        outline: none;
+    }
+
+    /* Button styling */
+    .filter-button {
+        padding: 10px 20px;
+        font-size: 1.1em;
+        background-color: #007BFF;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+    /* Button hover effect */
+    .filter-button:hover {
+        background-color: #0056b3;
+    }
+
+    /* Styling for smaller screens */
+    @media (max-width: 768px) {
+        .filter-date-form {
+            flex-direction: column;
+            padding: 15px;
+        }
+
+        .filter-label {
+            margin-bottom: 10px;
+        }
+
+        .date-input, .filter-button {
+            width: 100%;
+            margin-right: 0;
+            margin-bottom: 10px;
+        }
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .container-updates {
+            padding: 20px;
+            width: 100%;
+        }
+
+        h1 {
+            font-size: 1.8em;
+            margin-bottom: 20px;
+        }
+
+        .date-header {
+            font-size: 1.1em;
+        }
+
+        .back-link {
+            font-size: 1em;
+            padding: 8px 16px;
+        }
+
+        .update-card {
+            padding: 15px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        h1 {
+            font-size: 1.6em;
+        }
+
+        .date-header {
+            font-size: 1em;
+        }
+
+        .back-link {
+            font-size: 0.9em;
+        }
+    }
+</style>
+
+<div class="container-updates">
+    <h1>Project : {{task.project.project_name}}</h1>
+    <h1>Task Updates for Task #{{ task.module.module_name}}</h1>
+    
+    <!-- Filter Form for Date -->
+    <form method="GET" action="" class="filter-date-form" style="margin-bottom: 30px; text-align: center;">
+        <label for="updated_at" class="filter-label">Filter by Date:</label>
+        <input type="date" name="updated_at" value="{{ selected_updated_at }}" class="date-input" />
+        <button type="submit" class="filter-button">Filter</button>
+    </form>
+
+    {% for date, updates in updates_by_date.items %}
+        <div class="date-header">{{ date }}</div>
+        {% for update in updates %}
+            <div class="update-card">
+                <div class="update-detail">
+                    <strong>Status:</strong> {{ update.status }}
+                </div>
+                <div class="update-detail">
+                    <strong>Progress Update:</strong> {{ update.progress_update }}
+                </div>
+                {% if update.attachments %}
+                    <div class="attachments">
+                        <strong>Attachment:</strong> 
+                        <a href="{{ update.attachments.url }}" target="_blank">View File</a>
+                    </div>
+                {% endif %}
+                <div class="update-detail">
+                    <strong>Updated By:</strong> {{ update.updated_by }}
+                </div>
+                <div class="update-detail">
+                    <strong>Updated At:</strong> {{ update.updated_at }}
+                </div>
+            </div>
+        {% endfor %}
+    {% empty %}
+        <p>No updates available for this task.</p>
+    {% endfor %}
+    <a href="{% url 'tl_status' %}" class="back-link" style="text-decoration: none;">Back to Project Details</a>
+</div>
+
+{% endblock %}

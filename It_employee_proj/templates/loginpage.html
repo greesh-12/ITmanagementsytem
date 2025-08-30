@@ -1,0 +1,212 @@
+{% extends 'home1.html' %}
+
+{% block content %}
+{% load static %}
+<style>
+    body {
+        font-family: 'Roboto', Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f5f5f5;
+    }
+    
+    /* Main container */
+    .container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 80vh;
+        max-width: 100%;
+        /* background-image: url('{% static "images/login_page.jpg" %}'); */
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+        margin-top: 10px;
+    }
+
+    /* Auth container with transparency */
+    .auth-container {
+        background-color: rgba(255, 255, 255, 0.85); /* Semi-transparent background */
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+        padding: 30px;
+        width: 100%;
+        max-width: 400px;
+        border-radius: 10px;
+        margin: 20px;
+    }
+
+    .auth-container h2 {
+        text-align: center;
+        margin-bottom: 20px;
+        color: #333;
+        font-size: 1.8rem;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-group label {
+        display: block;
+        font-weight: 500;
+        margin-bottom: 5px;
+        color: #555;
+    }
+
+    .form-group input {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        font-size: 16px;
+        transition: border-color 0.3s, box-shadow 0.3s;
+    }
+
+    .form-group input:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 8px rgba(0, 123, 255, 0.5);
+        outline: none;
+    }
+
+    .btn {
+        width: 100%;
+        padding: 12px;
+        font-size: 16px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+
+    .btn:hover {
+        background-color: #0056b3;
+    }
+
+    .switch-link {
+        text-align: center;
+        margin-top: 15px;
+    }
+
+    .switch-link a {
+        color: #007bff;
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    .switch-link a:hover {
+        text-decoration: underline;
+    }
+
+    /* Add this to your CSS file */
+.alert {
+    padding: 1rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 500;
+    border: 1px solid transparent;
+}
+
+.alert-success {
+    background-color: #76e991;
+    border-color: #c3e6cb;
+    color: #155724;
+}
+
+.alert-danger {
+    background-color: #dd5c67;
+    border-color: #f5c6cb;
+    color: #721c24;
+}
+
+.alert-warning {
+    background-color: #fff3cd;
+    border-color: #ffeeba;
+    color: #856404;
+}
+
+.alert-info {
+    background-color: #92ccd6;
+    border-color: #bee5eb;
+    color: #0c5460;
+}
+
+.alert .close {
+    font-size: 1.2rem;
+    
+    background-color: #d20e21;
+}
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .auth-container {
+            padding: 20px;
+            width: 100%;
+        }
+
+        .auth-container h2 {
+            font-size: 1.5rem;
+        }
+
+        .form-group input {
+            padding: 10px;
+            font-size: 14px;
+        }
+
+        .btn {
+            font-size: 14px;
+            padding: 10px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .auth-container {
+            padding: 15px;
+        }
+
+        .auth-container h2 {
+            font-size: 1.2rem;
+        }
+
+        .form-group input {
+            padding: 8px;
+        }
+
+        .btn {
+            font-size: 12px;
+            padding: 8px;
+        }
+    }
+</style>
+
+
+<div class="container">
+    <!-- Login Form -->
+    <div class="auth-container" id="loginForm">
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show my-3" role="alert" style="border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+            <strong>{{ message.tags|title }}!</strong> {{ message }}
+        </div>
+        {% endfor %}
+        {% endif %}
+        <h2>Login</h2>
+        <form action="{% url 'login_fun' %}" method="POST">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="signupUname">Username</label>
+                <input type="text" id="signupUsername" name="username" placeholder="Enter your username" required>
+            </div>
+            <div class="form-group">
+                <label for="loginPassword">Password</label>
+                <input type="password" id="loginPassword" name="password" placeholder="Enter your password" required>
+            </div>
+            <button type="submit" class="btn">Login</button>
+        </form>
+        <div class="switch-link">
+            <p> <a href=""></a></p>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

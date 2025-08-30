@@ -1,0 +1,169 @@
+{% extends 'admin_base.html' %}
+
+{% block content %}
+{% load static %}
+
+<style>
+    body {
+        font-family: 'Arial', sans-serif;
+        background-image: url('https://via.placeholder.com/1920x1080'); /* Replace with a background image */
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+        margin: 0;
+        padding: 0;
+    }
+
+    .container {
+        background-color: rgba(255, 255, 255, 0.8); /* Transparent background */
+        border-radius: 10px;
+        padding: 30px;
+        max-width: 800px; /* Adjust width for two sections */
+        margin: 50px auto;
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    h2 {
+        text-align: center;
+        margin-bottom: 20px;
+        color: #333;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-row {
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+
+    .form-row .form-group {
+        flex: 1;
+        min-width: 200px;
+    }
+
+    .btn {
+        background-color: #007bff;
+        color: white;
+        border: none;
+        transition: background-color 0.3s;
+    }
+
+    .btn:hover {
+        background-color: #0056b3;
+    }
+    /* Alert message styling */
+    .alert {
+            padding: 15px;
+            background-color: #d9edf7;
+            color: #31708f;
+            border: 1px solid #bce8f1;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .alert .close {
+            color: #31708f;
+            font-size: 20px;
+            font-weight: bold;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+        }
+
+        .alert .close:hover {
+            color: #0056b3;
+        }
+    @media (max-width: 768px) {
+        .container {
+            width: 90%;
+            padding: 10px; /* Further reduce padding for smaller screens */
+            margin: 15px auto; /* Reduce margin */
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            margin-bottom: 15px; /* Reduce heading margin */
+        }
+
+        .form-group {
+            margin-bottom: 5px; /* Reduce spacing between form groups */
+        }
+
+        
+    }
+</style>
+
+<div class="container">
+    {% if messages %}
+        <div class="alert alert-info alert-dismissible">
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+            {% for message in messages %}
+                <p>{{ message }}</p>
+            {% endfor %}
+        </div>
+    {% endif %}
+    <h2>Add Developer</h2>
+    <form action="{% url 'admin_signup_fun' %}" method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="form-row">
+            <div class="form-group">
+                <label for="fname">First Name</label>
+                <input type="text" class="form-control" id="fname" name="fname" placeholder="Enter first name" required>
+            </div>
+            <div class="form-group">
+                <label for="lname">Last Name</label>
+                <input type="text" class="form-control" id="lname" name="lname" placeholder="Enter last name" required>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="uname">Username</label>
+                <input type="text" class="form-control" id="uname" name="uname" placeholder="Enter username" required>
+            </div>
+            <div class="form-group">
+                <label for="phome">Phone</label>
+                <input type="text" class="form-control" id="phone" name="phone" placeholder="Enter your phone number" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" class="form-control" id="email" name="email" placeholder="Enter email" required>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="address">Address</label>
+                <textarea class="form-control" id="address" name="address" rows="3" placeholder="Enter address"></textarea>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="course">Course Completed</label>
+                <input type="text" class="form-control" id="course" name="course" placeholder="Enter completed course">
+            </div>
+            <div class="form-group">
+                <label for="certification">Attach Certification</label>
+                <input type="file" class="form-control" id="certification" name="certification" accept="certifications/.pdf,.jpg,.png" required>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="department">Select Department</label>
+                <select class="form-control" id="department" name="department" required>
+                    {% for i in department %}
+                    <option value="{{i.id}}">{{i.dept_name}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <input type="hidden" name="devp" value="3" id="i7">
+        <input type="hidden" name="status" value="1" id="i7">
+        <button type="submit" class="btn btn-primary w-100">Add</button>
+    </form>
+</div>
+
+
+{% endblock %}

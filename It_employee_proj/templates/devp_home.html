@@ -1,0 +1,158 @@
+{% extends 'devp_base.html' %}
+
+{% block content %}
+{% load static %}
+
+<style>
+    body {
+            font-family: Arial, sans-serif;
+            background-image: url('{% static "images/home2.jpg" %}'); /* Replace with your image URL */
+            background-size: cover; /* Ensure the image covers the entire background */
+            background-position: center; /* Center the background image */
+            background-attachment: fixed; /* Make the background image stay in place when scrolling */
+            margin: 0;
+            padding: 0;
+        }
+
+    /* Container styling */
+    .container-home {
+        position: relative;
+        width: 100%;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        color: rgb(11, 4, 4);
+    }
+
+    .container h1 {
+        font-size: 3rem;
+        margin: 0;
+    }
+
+    .container p {
+        font-size: 1.2rem;
+        margin-top: 10px;
+    }
+
+    /* Section styling */
+    section {
+        padding: 60px 20px;
+        text-align: center;
+    }
+
+    .about, .services, .portfolio, .footer {
+        background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent background for readability */
+        color: white;
+        margin: 10px 0;
+    }
+
+    .about h2, .services h2, .portfolio h2, .footer h2 {
+        font-size: 2rem;
+        margin-bottom: 20px;
+    }
+
+    .about p, .services p, .portfolio p {
+        font-size: 1rem;
+        line-height: 1.5;
+    }
+
+    .services .service-item {
+        margin: 10px 0;
+    }
+
+    .portfolio img {
+        width: 100%;
+        max-width: 300px;
+        margin: 10px;
+        border-radius: 5px;
+    }
+
+    
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .container h1 {
+            font-size: 2rem;
+        }
+
+        .container p {
+            font-size: 1rem;
+        }
+
+        section {
+            padding: 40px 10px;
+        }
+
+        .portfolio img {
+            max-width: 100%;
+        }
+    }
+</style>
+
+     <!-- Display the unread notification count -->
+     {% if unread_count > 0 %}
+     <!-- Hidden checkbox to toggle the popup visibility -->
+     <input type="checkbox" id="popup-toggle" class="popup-toggle" style="display:none;">
+     
+     <!-- Notification Popup -->
+     <div id="notification-popup" class="notification-popup">
+         <div class="popup-content">
+             <h3>New Notification</h3>
+             <p>You have {{ unread_count }} unread notifications.</p>
+             <a href="{% url 'devp_notification' %}" class="btn btn-primary">View Notifications</a>
+             <label for="popup-toggle" class="close-btn">&times;</label>
+         </div>
+     </div>
+     
+     <!-- Checkbox to show/hide the popup (automatically checked if unread notifications exist) -->
+     <label for="popup-toggle" class="popup-overlay"></label>
+ {% endif %}
+
+<div class="container-home">
+    <h1>Welcome to Developer Hub</h1>
+    <p>Your journey to professional development starts here.</p>
+</div>
+
+<!-- About Section -->
+<section class="about">
+    <h2>About Us</h2>
+    <p>We are passionate developers creating impactful solutions and empowering communities through technology. Learn and grow with us!</p>
+</section>
+
+<!-- Services Section -->
+<section class="services">
+    <h2>Our Services</h2>
+    <div class="service-item">
+        <h3>Web Development</h3>
+        <p>We build responsive and scalable web applications tailored to your needs.</p>
+    </div>
+    <div class="service-item">
+        <h3>Mobile Development</h3>
+        <p>Creating user-friendly mobile apps for iOS and Android platforms.</p>
+    </div>
+    <div class="service-item">
+        <h3>Cloud Solutions</h3>
+        <p>Optimize your infrastructure with our secure and efficient cloud services.</p>
+    </div>
+</section>
+
+<!-- Portfolio Section -->
+<section class="portfolio">
+    <h2>Portfolio</h2>
+    <p>Check out some of our recent projects:</p>
+    <img src="{% static 'images/project1.jpg' %}" alt="Project 1">
+    <img src="{% static 'images/project2.jpg' %}" alt="Project 2">
+    <img src="{% static 'images/project3.jpg' %}" alt="Project 3">
+</section>
+
+<!-- Footer -->
+<section class="footer">
+    <h2>Contact Us</h2>
+    <p>Email: developerhub@example.com | Phone: +123 456 7890</p>
+    <p>&copy; 2025 Developer Hub. All Rights Reserved.</p>
+</section>
+
+{% endblock %}

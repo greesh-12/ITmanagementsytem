@@ -1,0 +1,194 @@
+{% extends 'admin_base.html' %}
+
+{% block content %}
+{% load static %}
+<style>
+    /* General body styling */
+    body {
+        font-family: 'Arial', sans-serif;
+        background-color: #f7f7f7;
+        margin: 0;
+        padding: 0;
+        color: #333;
+    }
+
+    
+
+    /* Centering the content */
+    center {
+        width: 100%;
+        max-width: 1200px;
+        margin: 50px auto;
+        display: block;
+        padding: 0 20px;
+    }
+
+    /* Heading style */
+    h2 {
+        text-align: center;
+        font-size: 24px;
+        color: #444;
+        margin-bottom: 30px;
+    }
+
+    /* Styling for the alert message */
+    .alert {
+        padding: 15px;
+        background-color: #d9edf7;
+        color: #31708f;
+        border: 1px solid #bce8f1;
+        border-radius: 5px;
+        margin-bottom: 20px;
+    }
+
+    .alert .close {
+        color: #31708f;
+        font-size: 20px;
+        font-weight: bold;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+    }
+
+    .alert .close:hover {
+        color: #0056b3;
+    }
+
+    /* Table styling */
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 0 auto;
+        background-color: white;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    table th, table td {
+        padding: 12px;
+        text-align: center;
+        border: 1px solid #ddd;
+    }
+
+    table th {
+        background-color:#31708f;
+        color: white;
+        font-weight: bold;
+    }
+
+    table tr:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+
+    table tr:hover {
+        background-color: #f1f1f1;
+    }
+
+    /* Action button styles */
+    .btn {
+        padding: 6px 12px;
+        font-size: 14px;
+        border-radius: 4px;
+        text-decoration: none;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        margin: 5px;
+    }
+
+    .btn-info {
+        background-color: #007bff;
+        color: white;
+    }
+
+    .btn-info:hover {
+        background-color: #0056b3;
+    }
+
+    .btn-danger {
+        background-color: #dc3545;
+        color: white;
+    }
+
+    .btn-danger:hover {
+        background-color: #c82333;
+    }
+
+    .btn:disabled {
+        background-color: #ccc;
+        color: #666;
+        cursor: not-allowed;
+    }
+
+    /* Responsive design */
+    @media (max-width: 768px) {
+        table {
+            width: 100%;
+            font-size: 14px;
+        }
+
+        table th, table td {
+            padding: 8px;
+        }
+
+        h2 {
+            font-size: 20px;
+        }
+
+        .btn {
+            font-size: 12px;
+            padding: 5px 10px;
+        }
+    }
+</style>
+
+<center>
+    {% if messages %}
+        <div class="alert alert-info alert-dismissible">
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+            {% for message in messages %}
+                <p>{{ message }}</p>
+            {% endfor %}
+        </div>
+    {% endif %}
+    
+    <h2>Approve/Disapprove Users</h2>
+    
+    <div style="overflow-x:auto;">
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Phone number</th>
+                    <th>Address</th>
+                    <th>Department</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for u in usr %}
+                    <tr>
+                        <td>{{ u.user.first_name }} {{ u.user.last_name }}</td>
+                        <td>{{ u.user.email }}</td>
+                        <td> {{u.phone}} </td>
+                        <td>{{u.address}}</td>
+                        <td>{{u.department.dept_name}}</td>
+                        <td>
+                            {% if u.user.status == 0 %}
+                                <a href="{% url 'approve' u.user.id %}" class="btn btn-info">Approve</a>
+                                <a href="{% url 'disapprove' u.user.id %}" class="btn btn-danger">Disapprove</a>
+                            {% endif %}
+                            {% if u.user.status == 1 %}
+                                <button type="button" class="btn btn-info" disabled>Approved</button>
+                            {% endif %}
+                            {% if u.user.status == 2 %}
+                                <button type="button" class="btn btn-info" disabled>Disapproved</button>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</center>
+
+{% endblock %}

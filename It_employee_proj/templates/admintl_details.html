@@ -1,0 +1,102 @@
+{% extends "admin_base.html" %}
+
+{% block content %}
+<style>
+     /* Custom label font-size for smaller screens */
+     @media (max-width: 576px) {
+        .form-label {
+            font-size: 14px;
+        }
+
+        .form-select {
+            font-size: 14px;
+            padding: 8px;
+        }
+    }
+
+    /* Center table text on all screen sizes */
+    table td,
+    table th {
+        vertical-align: middle;
+    }
+</style>
+
+
+
+<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+
+<div class="container my-4">
+    <h1 class="text-center mb-4">Team Leader Details</h1>
+
+    <!-- Filter Section -->
+    <div class="filter-section mb-4">
+        <form method="GET" class="row g-3 align-items-center">
+            <div class="col-md-6 col-6">
+                <!-- <label for="department" class="form-label">Department:</label> -->
+                <select name="department" id="department" class="form-select">
+                    <option value="" style="width: 65%;">select your department</option>
+                    {% for department in departments %}
+                    <option value="{{ department.id }}" {% if request.GET.department == department.id|stringformat:"s" %}selected{% endif %}>
+                        {{ department.dept_name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-6 col-6  align-items-center">
+                
+                <button type="submit" class="btn btn-primary w-90">Filter</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Table Section -->
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered text-center">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Name</th>
+                    <th>Address</th>
+                    <th>Email</th>
+                    <th>Phone Number</th>
+                    <th>Course Completed</th>
+                    <th>Department</th>
+                    <th>Certificate</th>
+                    <th>Delete</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for i in usr %}
+                {% if i.user.user_type == 2 %}
+                <tr>
+                    <td data-label="Name">
+                        <a href="{% url 'admintl_profile' i.id %}" style="text-decoration: none;">
+                            {{ i.user.first_name }} {{ i.user.last_name }}
+                        </a>
+                    </td>
+                    <td data-label="Address">{{ i.address }}</td>
+                    <td data-label="Email">{{ i.user.email }}</td>
+                    <td data-label="Phone">{{ i.phone }}</td>
+                    <td data-label="Course">{{ i.course }}</td>
+                    <td data-label="Department">{{ i.department.dept_name }}</td>
+                    <td data-label="Certificate">
+                        <!-- <a href="{{ i.certificate.url }}" download>
+                            <img src="{{ i.certificate.url }}" alt="{{ i.user.first_name }} {{ i.user.last_name }}" class="img-thumbnail" style="max-width: 100px;">
+                        </a>
+                        <br> -->
+                        <a href="{{ i.certificate.url }}" download class="btn btn-sm btn-success mt-2">
+                            Download
+                        </a>
+                    </td>
+                    <td data-label="Delete">
+                        <a href="{% url 'delete_devp' i.id %}" class="btn btn-sm btn-danger">Delete</a>
+                    </td>
+                </tr>
+                {% endif %}
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+{% endblock %}

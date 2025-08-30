@@ -1,0 +1,123 @@
+{% extends 'tl_base.html' %}
+
+{% block content %}
+<style>
+    /* General styling */
+    body {
+        font-family: 'Arial', sans-serif;
+        background-color: #f8f9fa;
+        margin: 0;
+        padding: 0;
+    }
+    
+    .form-container {
+        width: 90%;
+        max-width: 600px;
+        margin: 30px auto;
+        background-color: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .form-container h1 {
+        text-align: center;
+        font-size: 24px;
+        color: #007BFF;
+        margin-bottom: 20px;
+    }
+    
+    form label {
+        display: block;
+        font-weight: bold;
+        margin-bottom: 5px;
+        color: #333;
+    }
+    
+    form select,
+    form textarea,
+    form input[type="file"],
+    form button {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 15px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+        box-sizing: border-box;
+    }
+    
+    form select:focus,
+    form textarea:focus,
+    form input[type="file"]:focus,
+    form button:focus {
+        outline: none;
+        border-color: #007BFF;
+        box-shadow: 0 0 4px rgba(0, 123, 255, 0.5);
+    }
+    
+    form button {
+        background-color: #007BFF;
+        color: white;
+        border: none;
+        font-size: 16px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+    
+    form button:hover {
+        background-color: #0056b3;
+    }
+    
+    a {
+        display: block;
+        text-align: center;
+        margin-top: 15px;
+        color: #007BFF;
+        text-decoration: none;
+        font-weight: bold;
+    }
+    
+    a:hover {
+        text-decoration: underline;
+    }
+    
+    /* Responsive styles */
+    @media (max-width: 480px) {
+        .form-container {
+            padding: 15px;
+        }
+    
+        form button {
+            font-size: 14px;
+        }
+    }
+</style>
+
+<div class="form-container">
+    <h1>Update Project: {{ project.project_name }}</h1>
+
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        <label for="status">Status:</label>
+        <select name="status" id="status" required>
+            <option value="not_started" {% if project.updates.last and project.updates.last.status == "not_started" %}selected{% endif %}>Not Started</option>
+            <option value="in_progress" {% if project.updates.last and project.updates.last.status == "in_progress" %}selected{% endif %}>In Progress</option>
+            <option value="completed" {% if project.updates.last and project.updates.last.status == "completed" %}selected{% endif %}>Completed</option>
+            <option value="on_hold" {% if project.updates.last and project.updates.last.status == "on_hold" %}selected{% endif %}>On Hold</option>
+            <option value="canceled" {% if project.updates.last and project.updates.last.status == "canceled" %}selected{% endif %}>Canceled</option>
+        </select><br><br>
+
+        <label for="comments">Comments:</label><br>
+        <textarea name="comments" id="comments" rows="4" placeholder="Enter your progress update here" required></textarea><br><br>
+
+        <label for="attachment">Attachment :</label>
+        <input type="file" name="attachment" id="attachment" required><br><br>
+
+        <button type="submit">Submit Update</button>
+    </form>
+
+    <a href="{% url 'tl_updated_details'  %}">Back to Project Details</a>
+</div>
+{% endblock %}

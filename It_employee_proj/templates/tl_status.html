@@ -1,0 +1,262 @@
+{% extends 'tl_base.html' %}
+
+{% block content %}
+{% load static %}
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f9f9fb;
+        margin: 0;
+        padding: 0;
+        color: #333;
+    }
+
+    h1 {
+        text-align: center;
+        margin: 20px 0;
+        color: #444;
+    }
+
+    .task-table-container {
+        width: 90%;
+        max-width: 1200px;
+        margin: 0 auto 20px;
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.9rem;
+    }
+
+    thead {
+        background: #007bff;
+        color: white;
+        text-transform: uppercase;
+    }
+
+    thead th {
+        padding: 15px;
+        text-align: left;
+    }
+
+    tbody tr {
+        border-bottom: 1px solid #ddd;
+    }
+
+    tbody tr:nth-child(even) {
+        background: #f7f7f7;
+    }
+
+    tbody td {
+        padding: 12px;
+        text-align: left;
+    }
+
+    tbody tr:hover {
+        background: #eaeef3;
+    }
+
+    a {
+        color: #007bff;
+        text-decoration: none;
+    }
+
+    a:hover {
+        text-decoration: underline;
+    }
+
+    .back-link {
+        display: inline-block;
+        margin: 20px auto;
+        padding: 10px 20px;
+        background: #007bff;
+        color: white;
+        text-decoration: none;
+        border-radius: 4px;
+        text-align: center;
+        max-width: 200px;
+    }
+
+    .back-link:hover {
+        background: #0056b3;
+        color: white;
+    }
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    table, thead, tbody, th, td, tr {
+        display: block;
+        padding: 0; /* Remove default padding for better control */
+    }
+
+    thead {
+        display: none;
+    }
+
+    tbody tr {
+        margin-bottom: 20px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        background: #f0f4f8; /* Slightly darker background for rows */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow effect for rows */
+    }
+
+    tbody td {
+        display: block;
+        padding: 15px;
+        text-align: left;
+        font-size: 1rem;
+        border-top: 1px solid #ddd;
+        background: #ffffff;
+        margin-bottom: 12px; /* Increased space between rows */
+        border-radius: 5px;
+    }
+
+    tbody td::before {
+        content: attr(data-label);
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 8px;
+        font-size: 1.1rem;
+    }
+
+    tbody td:last-child {
+        border-bottom: 1px solid #ddd;
+    }
+
+    tbody tr:hover {
+        background: #e2e6ea; /* Lighter hover effect */
+    }
+
+    th, td {
+        padding: 18px 16px; /* Increased padding between th and td for a more spacious feel */
+    }
+
+    .back-link {
+        display: block;
+        width: 85%;
+        max-width: 320px;
+        margin: 20px auto;
+        padding: 14px 0;
+        background: #28a745; /* Green background */
+        color: white;
+        text-decoration: none;
+        border-radius: 6px;
+        text-align: center;
+        font-size: 1.1rem;
+        font-weight: bold;
+    }
+
+    .back-link:hover {
+        background: #218838; /* Darker green on hover */
+    }
+}
+
+
+</style>
+{% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+<h1>Team Leader Panel - Task Assigned Progress</h1>
+
+<form method="get" class="filter-form" style="margin: 20px auto; text-align: center;">
+    <label for="project">Filter by Project:</label>
+    <select name="project" id="project" style="margin: 0 10px; padding: 5px 10px;">
+        <option value="">All Projects</option>
+        {% for project in projects %}
+            <option value="{{ project.project_name }}" {% if project_filter == project.project_name %}selected{% endif %}>
+                {{ project.project_name }}
+            </option>
+        {% endfor %}
+    </select>
+
+    <label for="developer">Filter by Developer:</label>
+    <select name="developer" id="developer" style="margin: 0 10px; padding: 5px 10px;">
+        <option value="">All Developers</option>
+        {% for developer in developers %}
+            <option value="{{ developer.user__id }}" {% if developer_filter == developer.user__id|stringformat:"s" %}selected{% endif %}>
+                {{ developer.user__first_name }} {{ developer.user__last_name }}
+            </option>
+        {% endfor %}
+    </select>
+
+    <button type="submit" style="padding: 5px 15px; background-color: #007bff; color: white; border: none; border-radius: 4px;">
+        Filter
+    </button>
+</form>
+
+
+
+<div class="task-table-container">
+    {% if tasks %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Developer</th>
+                    <th>Project</th>
+                    <th>Module</th>
+                    <th>Developer Status</th>
+                    <th>Progress Update</th>
+                    <th>Attachments</th>
+                    <th>Assigned Date</th>
+                    <th>Last Updated</th>
+                    <th>Daily progress of Developer</th>
+                    <!-- <th>Updates</th> -->
+                    
+                </tr>
+            </thead>
+            <tbody>
+                {% for task in tasks %}
+                    <tr>
+                        <td data-label="Developer">{{ task.user.first_name }} {{ task.user.last_name }}</td>
+                        <td data-label="Project">{{ task.project.project_name }}</td>
+                        <td data-label="Module">{{ task.module.module_name }}</td>
+                        <td data-label="Status">{{ task.status }}</td>
+                        <td data-label="Progress Update">
+                            {% if task.progress_update %}
+                                {{ task.progress_update }}
+                            {% else %}
+                                No updates provided
+                            {% endif %}
+                        </td>
+                        <td data-label="Attachments">
+                            {% if task.attachments %}
+                                <a href="{{ task.attachments.url }}" download>Download</a>
+                            {% else %}
+                                No Attachments
+                            {% endif %}
+                        </td>
+                        <td data-label="Assigned Date">{{ task.assigned_at|date:"Y-m-d H:i" }}</td>
+                        <td data-label="Last Updated">{{ task.updated_at|date:"Y-m-d H:i" }}</td>
+                        <td data-label="Update">
+                            <a href="{% url 'tl_dailyupdates' task.id %}">check progress </a><br>
+                        </td>
+                        <!-- <td data-label="Update">
+                            <a href="{% url 'tl_updates' task.id %}">Update Task </a><br>
+                        </td> -->
+                        
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p style="text-align: center; padding: 20px; font-size: 1rem; color: #666;">No tasks found.</p>
+    {% endif %}
+    <a href="{% url 'tl_home' %}" style="text-decoration: none;" class="back-link">Back to Dashboard</a>
+</div><br><br>
+
+{% endblock %}
